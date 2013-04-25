@@ -1,62 +1,48 @@
-import numpy as np
 """
 Shallow water Equations in One Dimension with no bottom topography are:
 
 h_t + (hu)_x = 0
 (hu)_t + (hu^2 + 1/2 g h^2 )_x = 0
 
+hu^2 = q2^2/q1 + 1/2 g q2^2
 
 Here, I used periodic boundary conditions. Might want to generalize the code later.
 """
+import numpy as np
+from clawpack import pyclaw
+from clawpack.riemann.rp_shallow import rp_shallow_roe_1d
 
-class OneDGrid:
-    def __init__(self,x=None,m=None,bounds=[-1.0,1.0]):
-        if m is not None:
-            m = float(m)
-            L = bounds[1]-bounds[0]
-            h = L/m
-            x = h*(np.arange(m) + .5) + bounds[0]
-            xl = np.arange(m)*h + bounds[0]
-        elif x is not None:
-            m = float(x.shape[0])
-            h = L/m
+nx = 128
+x = pyclaw.Dimension('x',-10.0,10.0,nx)
+domain = pyclaw.Domain(x)
+state = pyclaw.State(domain,2)
 
-        self.bounds = bounds
-        self.L = L
-        self.m = int(m)
-        self.h = h
-        self.x = x
-        self.xl = xl
+# Initial Data for 1D Riemann Problem
+h0 = (2-np.sign(x.centers))
+u0 = np.zeros(x.num_cells)
 
-class SWSolution:
-    def __init__(self,grid=None):
-        """docstring for __init__"""
-        pass
+state.q[0,:]=h0
+state.q[1,:]=u0*h0
 
-def ReimannSolve(ql,qr,A):
-    pass
+state.problem_data['grav'] = 9.81
+state.problem_data['efix'] = False
 
-def CalcFlux(ul,ur,hl,hr):
-    return (1,1)
+# Setup Solver
+solver = pyclaw.ClawSolver1D()
+solver.kernel_language = 'Python'
+solver.rp = rp_shallow_roe_1d
+solver.num_waves = 2
+solver.bc_lower[0]=pyclaw.BC.wall
+solver.bc_upper[0]=pyclaw.BC.wall
 
 
-if __name__=='__main__':
-    gg = OneDGrid(m=128)
-    ul = np.zeros(gg.m)
-    hl = np.zeros(gg.m)
-    u0 = np.zeros(gg.m)
-    h0 = (np.sign(gg.x) -1) / (-2) + 1
-    u = np.zeros(gg.m)
-    h = np.zeros(gg.m)
+# Run solution
+solution = pyclaw.Solution(state,domain)
 
-    # Setup Time Stepping
-    tau = gg.h/2
-    T   = 1.0
-    nt  = T/tau + 1
-    t   = np.arange(nt)*tau
+controller = pyclaw.Controller()
+controller.solution = solution
+controller.solver   = solver
+controller.tfinal   = 4
+controller.run()
+pyclaw.plot.html_plot()
 
-    for tt in np.nditer(t[1:]):
-
-        # Calculate Fluxes
-        for i in range(gg.m):
-            ul[i],hl[i] = CalcFlux(u[i-1],u[i],h[i-1],h[i])
