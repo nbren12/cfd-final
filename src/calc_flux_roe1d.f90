@@ -1,3 +1,14 @@
+subroutine calc_fluxes(fluxes,qbc,nx,ng,g)
+real(8) qbc(2,nx+2*ng),g,fluxes(2,nx+1)
+integer nx,ng,i
+intent(out) fluxes
+
+do i=1,(nx+ng)
+    call calc_flux(fluxes(:,i),qbc(:,i),qbc(:,i+1),g)
+end do
+
+end subroutine calc_fluxes
+
 subroutine calc_flux(flux,ql,qr,g)
 !double precision flux(2),ql(2),qr(2),g
 real(8), dimension(2,2) :: R,L,S

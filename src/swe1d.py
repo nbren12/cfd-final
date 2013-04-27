@@ -13,8 +13,8 @@ from ipdb import set_trace as st
 from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
-from calc_flux_roe1d import calc_flux
-nx = 512
+from calc_flux_roe1d import calc_fluxes
+nx = 3000
 ng = 1
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 domain = pyclaw.Domain(x)
@@ -37,10 +37,10 @@ fluxes = np.zeros((2,nx+1))
 g = state.problem_data['grav']
 dx = state.grid.delta[0]
 dt = dx / 10
-T  = .3
+T  = .5
 nt = int(T/dt)
 for i in xrange(nt):
-    print i
+    # print i
 
 # fill ghost cell
     qbc[:,ng:-ng] = state.q
@@ -48,8 +48,7 @@ for i in xrange(nt):
     qbc[:,-1]= state.q[:,0]
 
 # Calculate Fluxes at every cell
-    for j in xrange(nx+ng):
-        fluxes[:,j]  = calc_flux(qbc[:,j],qbc[:,j+1],g)
+    fluxes = calc_fluxes(qbc,nx,ng,g)
 # Advance Solution
     state.q =state.q -(dt/dx)*(fluxes[:,ng:]-fluxes[:,:-ng])
 
