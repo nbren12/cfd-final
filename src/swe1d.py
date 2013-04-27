@@ -13,6 +13,7 @@ from ipdb import set_trace as st
 from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
+from calc_flux_roe1d import calc_flux
 nx = 512
 ng = 1
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
@@ -30,44 +31,16 @@ state.q[1,:]=u0*h0
 state.problem_data['grav'] = 9.81
 state.problem_data['efix'] = False
 
-def calc_flux(ql,qr,g):
-
-    ul = ql[1]/ql[0]
-    ur = qr[1]/qr[0]
-    hl = ql[0]
-    hr = qr[0]
-
-    hl2 = sqrt(hl)
-    hr2 = sqrt(hr)
-
-    fql = np.array([hl*ul,hl*ul**2+g*hl**2/2])
-    fqr = np.array([hr*ur,hr*ur**2+g*hr**2/2])
-
-    u_hat = ( hl2*ul + hr2*ur )/(hl2 + hr2)
-    h_bar = (hl+hr)/2
-    c_hat = sqrt(g*h_bar)
-
-
-
-    A_hat = np.matrix([[0,1],[-u_hat**2 + g * h_bar,2*u_hat]])
-
-    lam_hat = np.matrix(np.diag([u_hat-c_hat,u_hat+c_hat]))
-    R = np.matrix([[1,1],[u_hat-c_hat,u_hat+c_hat]])
-    L = np.matrix([[u_hat+c_hat,-1],[-u_hat+c_hat,1]]) / 2.0 / c_hat
-
-    A_abshat = R * np.abs(lam_hat) * L
-    flux = (fql+fqr)/2.0  - np.dot(A_abshat,qr-ql)/2.0
-
-    return flux
 
 qbc = np.zeros((2,ng*2 + nx ))
 fluxes = np.zeros((2,nx+1))
 g = state.problem_data['grav']
 dx = state.grid.delta[0]
 dt = dx / 10
-T  = 1.0
+T  = .3
 nt = int(T/dt)
 for i in xrange(nt):
+    print i
 
 # fill ghost cell
     qbc[:,ng:-ng] = state.q
