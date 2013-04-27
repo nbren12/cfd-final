@@ -13,7 +13,7 @@ from ipdb import set_trace as st
 from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
-nx = 128
+nx = 512
 ng = 1
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 domain = pyclaw.Domain(x)
@@ -57,7 +57,6 @@ def calc_flux(ql,qr,g):
 
     A_abshat = R * np.abs(lam_hat) * L
     flux = (fql+fqr)/2.0  - np.dot(A_abshat,qr-ql)/2.0
-    st()
 
     return flux
 
@@ -65,8 +64,10 @@ qbc = np.zeros((2,ng*2 + nx ))
 fluxes = np.zeros((2,nx+1))
 g = state.problem_data['grav']
 dx = state.grid.delta[0]
-dt = dx/ 2
-for i in range(100):
+dt = dx / 10
+T  = 1.0
+nt = int(T/dt)
+for i in xrange(nt):
 
 # fill ghost cell
     qbc[:,ng:-ng] = state.q
