@@ -13,15 +13,14 @@ from ipdb import set_trace as st
 from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
-from calc_flux_roe1d import calc_fluxes
-nx = 5000
-ng = 1
+from calc_flux_roe1d_lw import calc_fluxes
+nx = 1000
+ng = 2
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 domain = pyclaw.Domain(x)
 state = pyclaw.State(domain,2)
 
 # Initial Data for 1D Riemann Problem
-num_ghost = 1
 h0 = (2-np.sign(x.centers))
 u0 = np.zeros(x.num_cells)
 
@@ -39,18 +38,19 @@ dx = state.grid.delta[0]
 dt = dx / 10
 T  = .5
 nt = int(T/dt)
-for i in xrange(nt):
+# for i in xrange(nt):
+for i in xrange(1):
     print i
 
     # fill ghost cell
     qbc[:,ng:-ng] = state.q
-    qbc[:,0] = state.q[:,-1]
-    qbc[:,-1]= state.q[:,0]
+    qbc[:,:ng] = state.q[:,-ng:]
+    qbc[:,-ng:] = state.q[:,:ng]
 
     # Calculate Fluxes at every cell
-    fluxes = calc_fluxes(qbc,nx,ng,g)
+    alpha,s,R  = calc_fluxes(qbc,nx,ng,g,dt,dx)
     # Advance Solution
-    state.q =state.q -(dt/dx)*(fluxes[:,ng:]-fluxes[:,:-ng])
+    # state.q =state.q -(dt/dx)*(fluxes[:,1:]-fluxes[:,:-1])
 
-plt.plot(state.grid.c_centers[0],state.q[0,:])
-plt.show()
+# plt.plot(state.grid.c_centers[0],state.q[0,:])
+# plt.show()

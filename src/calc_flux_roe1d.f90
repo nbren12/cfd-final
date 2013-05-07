@@ -4,8 +4,8 @@ real(8) qbc(2,nx+2*ng),g,fluxes(2,nx+1)
 integer nx,ng,i
 intent(out) fluxes
 
-do i=1,(nx+ng)
-    call calc_flux(fluxes(:,i),qbc(:,i),qbc(:,i+1),g)
+do i=1,(nx+1)
+    call calc_flux(fluxes(:,i),qbc(:,i+ng-1),qbc(:,i+ng),g)
 end do
 
 end subroutine calc_fluxes
