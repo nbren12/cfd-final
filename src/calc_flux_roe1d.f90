@@ -1,4 +1,5 @@
 subroutine calc_fluxes(fluxes,qbc,nx,ng,g)
+implicit none
 real(8) qbc(2,nx+2*ng),g,fluxes(2,nx+1)
 integer nx,ng,i
 intent(out) fluxes
@@ -10,6 +11,7 @@ end do
 end subroutine calc_fluxes
 
 subroutine calc_flux(flux,ql,qr,g)
+implicit none
 !double precision flux(2),ql(2),qr(2),g
 real(8), dimension(2,2) :: R,L,S
 real(8),dimension(2) :: flux,ql,qr

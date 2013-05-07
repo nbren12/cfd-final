@@ -14,7 +14,7 @@ from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
 from calc_flux_roe1d import calc_fluxes
-nx = 3000
+nx = 5000
 ng = 1
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 domain = pyclaw.Domain(x)
@@ -40,16 +40,16 @@ dt = dx / 10
 T  = .5
 nt = int(T/dt)
 for i in xrange(nt):
-    # print i
+    print i
 
-# fill ghost cell
+    # fill ghost cell
     qbc[:,ng:-ng] = state.q
     qbc[:,0] = state.q[:,-1]
     qbc[:,-1]= state.q[:,0]
 
-# Calculate Fluxes at every cell
+    # Calculate Fluxes at every cell
     fluxes = calc_fluxes(qbc,nx,ng,g)
-# Advance Solution
+    # Advance Solution
     state.q =state.q -(dt/dx)*(fluxes[:,ng:]-fluxes[:,:-ng])
 
 plt.plot(state.grid.c_centers[0],state.q[0,:])
