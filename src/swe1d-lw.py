@@ -13,7 +13,7 @@ from ipdb import set_trace as st
 from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
-from calc_flux_roe1d_lw import calc_flucts,advance_1d
+from calc_flux_roe1d_lw import sw1d_lw as cf
 from calc_flux_roe1d import calc_fluxes
 nx = 250
 ng = 2
@@ -47,7 +47,7 @@ for i in xrange(nt):
     qbc[:,:ng] = state.q[:,-ng:]
     qbc[:,-ng:] = state.q[:,:ng]
 
-    advance_1d(state.q,g,dt,dx)
+    cf.advance_1d(state.q,g,dt,dx)
 
 plt.plot(state.grid.c_centers[0],state.q[0,:])
 plt.show()

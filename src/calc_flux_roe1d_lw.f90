@@ -1,3 +1,6 @@
+module SW1D_LW
+contains
+
 subroutine advance_1d(q,nx,g,dt,dx)
 implicit none
 integer nx,ng,i,idx,j
@@ -29,7 +32,7 @@ do i=1,nx+1
         else
             theta(j) = alpha(j,idx+1)/alpha(j,idx)
         end if
-        call PHI(alpha_tilde(j),theta(j)) 
+        alpha_tilde(j)=PHI(theta(j)) 
     else 
         alpha_tilde(j) = 0.0D0
     end if
@@ -52,14 +55,6 @@ end do
 
 end subroutine advance_1d
 
-subroutine PHI (alpha_tilde,theta)
-implicit none
-real(8) theta, alpha_tilde,tmp
-intent(out) alpha_tilde
-
-tmp = max(min(1.0D0,2*theta),min(2.0D0,theta))
-alpha_tilde = max(0.0D0, tmp)
-end subroutine PHI
 
 subroutine calc_flucts(alpha,S,R,qbc,nx,ng,g,dt,dx)
 implicit none
@@ -110,3 +105,12 @@ S(2) = u_hat + c_hat
 alpha = matmul(L,ql-qr)
 end subroutine roe_solve  
 
+function PHI (theta) result(y)
+implicit none
+real(8) theta,tmp,y
+intent(in) theta
+
+tmp = max(min(1.0D0,2*theta),min(2.0D0,theta))
+y = max(0.0D0, tmp)
+end function PHI
+end module SW1D_LW
