@@ -1,15 +1,21 @@
-subroutine advance_1d(F,F_tilde,qbc,nx,ng,g,dt,dx)
+subroutine advance_1d(q,nx,g,dt,dx)
 implicit none
+integer nx,ng,i,idx,j
+parameter(ng = 2)
 real(8) qbc(2,nx+2*ng),eye(2,2)
 real(8) alpha(2,nx+2*ng-1),R(2,2,nx+2*ng-1),S(2,nx+2*ng-1)
-real(8) F(2,nx), F_tilde(2,nx+1)
+real(8) F(2,nx), F_tilde(2,nx+1), q(2,nx)
 real(8), dimension(2) :: ql ,qr,alpha_tilde,theta
 real(8) :: dt,dx,g
-integer nx,ng,i,idx,j
-intent(out) F,F_tilde
+intent(inout) q
 
 eye(1,:) = (/1.0D0, 0.0D0/)
 eye(2,:) = (/ 0.0D0, 1.0D0/)
+
+qbc(:,:) = 0.0D0
+qbc(:,ng+1:ng+nx) = q
+qbc(:,1:ng) = q(:,nx-ng+1:nx)
+qbc(:,ng+nx+1:nx+2*ng) = q(:,1:ng)
 
 call calc_flucts(alpha,S,R,qbc,nx,ng,g,dt,dx)
 
@@ -41,6 +47,8 @@ do i = 1, nx
     F(:,i) = matmul(R(:,:,idx),alpha(:,idx)*max(S(:,idx),0.0D0))&
         +matmul(R(:,:,idx+1),alpha(:,idx+1)*min(S(:,idx+1),0.0D0))
 end do
+
+    q = qbc(:,ng+1:ng+nx) + F*dt/dx + (F_tilde(:,2:nx+1)-F_tilde(:,1:nx))*dt/dx
 
 end subroutine advance_1d
 

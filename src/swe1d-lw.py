@@ -15,7 +15,7 @@ from clawpack import pyclaw
 from matplotlib import pyplot as plt
 from calc_flux_roe1d_lw import calc_flucts,advance_1d
 from calc_flux_roe1d import calc_fluxes
-nx = 200
+nx = 250
 ng = 2
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 domain = pyclaw.Domain(x)
@@ -40,20 +40,14 @@ dt = dx / 10
 T  = .5
 nt = int(T/dt)
 for i in xrange(nt):
-# for i in xrange(1):
-    print i
+# # for i in xrange(1):
 
     # fill ghost cell
     qbc[:,ng:-ng] = state.q
     qbc[:,:ng] = state.q[:,-ng:]
     qbc[:,-ng:] = state.q[:,:ng]
 
-    # Calculate Fluxes at every cell
-    alpha,s,R  = calc_flucts(qbc,nx,ng,g,dt,dx)
-    F,F_tilde = advance_1d(qbc,nx,ng,g,dt,dx)
-    state.q = state.q + dt/dx * (F +F_tilde[:,1:]-F_tilde[:,:-1])
-    # Advance Solution
-    # state.q =state.q -(dt/dx)*(fluxes[:,1:]-fluxes[:,:-1])
+    advance_1d(state.q,g,dt,dx)
 
 plt.plot(state.grid.c_centers[0],state.q[0,:])
 plt.show()

@@ -14,7 +14,7 @@ from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
 from calc_flux_roe1d import calc_fluxes
-nx = 5000
+nx = 250
 ng = 1
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 domain = pyclaw.Domain(x)
@@ -40,7 +40,7 @@ dt = dx / 10
 T  = .5
 nt = int(T/dt)
 for i in xrange(nt):
-    print i
+    # print i
 
     # fill ghost cell
     qbc[:,ng:-ng] = state.q
