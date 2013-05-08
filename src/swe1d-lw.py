@@ -13,7 +13,7 @@ from ipdb import set_trace as st
 from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
-from calc_flux_roe1d_lw import sw1d_lw as cf
+from hr_solver1d import advance_1d
 
 nx = 250
 ng = 2
@@ -37,7 +37,7 @@ dt = dx / 10
 T  = 1.0
 nt = int(T/dt)
 for i in xrange(nt):
-    cf.advance_1d(state.q,g,dt,dx)
+    advance_1d(state.q,g,dt,dx)
 
 plt.plot(state.grid.c_centers[0],state.q[0,:])
 plt.show()

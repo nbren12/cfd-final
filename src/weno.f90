@@ -1,3 +1,5 @@
+module weno
+contains
 subroutine recon_uniform(f, n, fr)
     implicit none
     real(8), intent(in) :: f(n)
@@ -80,4 +82,4 @@ subroutine recon_uniform(f, n, fr)
     fr(i,1) = fs1
     end do
 end subroutine
-
+end module weno
