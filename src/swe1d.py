@@ -37,7 +37,7 @@ fluxes = np.zeros((2,nx+1))
 g = state.problem_data['grav']
 dx = state.grid.delta[0]
 dt = dx / 10
-T  = .5
+T  = 1.0
 nt = int(T/dt)
 for i in xrange(nt):
     # print i

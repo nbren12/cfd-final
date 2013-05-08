@@ -14,7 +14,7 @@ from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
 from calc_flux_roe1d_lw import sw1d_lw as cf
-from calc_flux_roe1d import calc_fluxes
+
 nx = 250
 ng = 2
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
@@ -31,22 +31,12 @@ state.q[1,:]=u0*h0
 state.problem_data['grav'] = 9.81
 state.problem_data['efix'] = False
 
-
-qbc = np.zeros((2,ng*2 + nx ))
-fluxes = np.zeros((2,nx+1))
 g = state.problem_data['grav']
 dx = state.grid.delta[0]
 dt = dx / 10
-T  = .5
+T  = 1.0
 nt = int(T/dt)
 for i in xrange(nt):
-# # for i in xrange(1):
-
-    # fill ghost cell
-    qbc[:,ng:-ng] = state.q
-    qbc[:,:ng] = state.q[:,-ng:]
-    qbc[:,-ng:] = state.q[:,:ng]
-
     cf.advance_1d(state.q,g,dt,dx)
 
 plt.plot(state.grid.c_centers[0],state.q[0,:])
