@@ -15,7 +15,7 @@ from clawpack import pyclaw
 from matplotlib import pyplot as plt
 from hr_solver1d import advance_1d
 
-nx = 100
+nx = 500
 ng = 2
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 domain = pyclaw.Domain(x)

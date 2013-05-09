@@ -15,7 +15,7 @@ from clawpack import pyclaw
 from matplotlib import pyplot as plt
 from weno_solver1d import advance_1d
 
-nx = 100
+nx = 10
 ng = 3
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 domain = pyclaw.Domain(x)
@@ -37,7 +37,11 @@ dt = dx / 10
 T  = 1.0
 nt = int(T/dt)
 for i in xrange(1):
-    test,alpha =advance_1d(state.q,g,dt,dx)
-
-plt.plot(state.grid.c_centers[0],state.q[0,:])
+    q_bc =advance_1d(state.q,g,dt,dx)
+    ql = q_bc[:,:,0]
+    qr = q_bc[:,:,1]
+plt.ion()
+plt.plot(state.grid.c_centers[0],state.q[0,:],'k')
+plt.plot(x.edges,ql[0,:],'o')
+plt.plot(x.edges,qr[0,:],'go')
 plt.show()
