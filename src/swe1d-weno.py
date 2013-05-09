@@ -13,10 +13,10 @@ from ipdb import set_trace as st
 from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
-from hr_solver1d import advance_1d
+from weno_solver1d import advance_1d
 
 nx = 100
-ng = 2
+ng = 3
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 domain = pyclaw.Domain(x)
 state = pyclaw.State(domain,2)
@@ -36,9 +36,8 @@ dx = state.grid.delta[0]
 dt = dx / 10
 T  = 1.0
 nt = int(T/dt)
-for i in xrange(nt):
-    advance_1d(state.q,g,dt,dx)
-    # pass
+for i in xrange(1):
+    test,alpha =advance_1d(state.q,g,dt,dx)
 
 plt.plot(state.grid.c_centers[0],state.q[0,:])
 plt.show()
