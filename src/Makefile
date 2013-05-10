@@ -8,7 +8,11 @@ OBJ = $(SRC:.f90=.so)
 FOBJ = $(SRC:.f90=_f2py.so)
 MODULE = hr_solver1d
 
-all: ${MODULE} weno_solver1d.so
+all: ${MODULE} weno_solver1d.so adv_weno.so
+
+adv_weno.so : $(OBJ) adv_weno.f90
+	$(F2PY) -c -m adv_weno $^
+
 
 weno_solver1d.so : $(OBJ) weno_solver1d.f90
 	$(F2PY) -c -m weno_solver1d $^
