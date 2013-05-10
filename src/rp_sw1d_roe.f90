@@ -1,15 +1,13 @@
 module rp_sw1d_roe
 contains
 
-subroutine calc_update(ql,qr,n,g,dt,dx,F)
+subroutine calc_update(L,S,R,ql,qr,n,g,dt,dx,F)
 implicit none
 real(8) L(2,2,n),R(2,2,n),S(2,n),alpha(2,n),F(2,n-1)
 real(8), dimension(2,n) :: ql ,qr
 real(8) :: dt,dx,g
 integer n,i
 intent(out) F
-
-call calc_chars(L,S,R,ql,qr,n,g,dt,dx)
 
 do i = 1,n
     alpha(:,i) = matmul(L(:,:,i),qr(:,i)-ql(:,i))

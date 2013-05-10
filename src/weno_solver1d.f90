@@ -31,7 +31,7 @@ qbc(:,nx+1:nx+3) = q(:,1:3)
 qb = q
 ! Calculate the local chars
 call calc_chars(L,S,R,qbc(:,-2:nx+2),qbc(:,-1:nx+3),nx+2*ng-1,g,dt,dx)
-call calc_update(qbc(:,0:nx),qbc(:,1:nx+1),nx+1,g,dt,dx,F)
+call calc_update(L(:,:,0:nx),S(:,0:nx),R(:,:,0:nx),qbc(:,0:nx),qbc(:,1:nx+1),nx+1,g,dt,dx,F)
 
 ! WENO Reconstruction
 do i = 0,nx+1
@@ -61,7 +61,7 @@ deallocate(alpha)
 
 
 ! TODO Solve the Riemann problem using the q_pm
-call calc_update(q_pm(:,:,1),q_pm(:,:,2),nx+1,g,dt,dx,F_w)
+!call calc_update(q_pm(:,:,1),q_pm(:,:,2),nx+1,g,dt,dx,F_w)
 qout = q - F_w*dt/dx 
 
 

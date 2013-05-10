@@ -37,7 +37,7 @@ dt = dx / 10
 T  = 1.0
 nt = int(T/dt)
 for i in xrange(nt):
-    advance_1d(state.q,g,dt,dx)
+    qbc = advance_1d(state.q,g,dt,dx)
     # pass
 
 plt.plot(state.grid.c_centers[0],state.q[0,:])
