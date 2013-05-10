@@ -1,22 +1,43 @@
 module rp_sw1d_roe
 contains
-subroutine calc_chars(L,S,R,q,n,g,dt,dx)
+
+subroutine calc_update(ql,qr,n,g,dt,dx,F)
 implicit none
-real(8) q(2,n)
-real(8) L(2,2,n-1),R(2,2,n-1),S(2,n-1)
-real(8), dimension(2) :: ql ,qr
+real(8) L(2,2,n),R(2,2,n),S(2,n),alpha(2,n),F(2,n-1)
+real(8), dimension(2,n) :: ql ,qr
+real(8) :: dt,dx,g
+integer n,i
+intent(out) F
+
+call calc_chars(L,S,R,ql,qr,n,g,dt,dx)
+
+do i = 1,n
+    alpha(:,i) = matmul(L(:,:,i),qr(:,i)-ql(:,i))
+end do
+
+do i = 1,n-1
+    ! Calculate firt order flux-difference
+    F(:,i) = matmul(R(:,:,i),alpha(:,i)*max(S(:,i),0.0D0))&
+        +matmul(R(:,:,i+1),alpha(:,i+1)*min(S(:,i+1),0.0D0))
+end do
+
+
+end subroutine calc_update
+
+subroutine calc_chars(L,S,R,ql,qr,n,g,dt,dx)
+implicit none
+real(8) L(2,2,n),R(2,2,n),S(2,n)
+real(8), dimension(2,n) :: ql ,qr
 real(8) :: dt,dx,g
 integer n,i
 intent(out) L,S,R 
 
 
 ! Calculate the fluctuations for each grid cell
-do i=1,(n-1)
-    ql = q(:,i)
-    qr = q(:,i+1)
+do i=1,n
 
     ! Calculate the Fluctations
-    call roe_solve(L(:,:,i),S(:,i),R(:,:,i),ql,qr,g)
+    call roe_solve(L(:,:,i),S(:,i),R(:,:,i),ql(:,i),qr(:,i),g)
 end do
 end subroutine calc_chars
 

@@ -19,7 +19,7 @@ qbc(:,ng+1:ng+nx) = q
 qbc(:,1:ng) = q(:,nx-ng+1:nx)
 qbc(:,ng+nx+1:nx+2*ng) = q(:,1:ng)
 
-call calc_chars(L,S,R,qbc,nx+2*ng,g,dt,dx)
+call calc_chars(L,S,R,qbc(:,1:nx+2*ng-1),qbc(:,2:nx+2*ng),nx+2*ng-1,g,dt,dx)
 
 ! Calculate the fluctuations
 do i=1,nx+2*ng-1

@@ -88,7 +88,7 @@ subroutine recon_uniform(f, n, fr)
     implicit none
     real(8), intent(in) :: f(n)
     integer, intent(in) :: n
-    real(8), intent(out) :: fr(n,0:2-1)
+    real(8), intent(out) :: fr(3:n-3,0:2-1)
     integer :: i
     real(8) :: sigma0, &
         sigma1, &
