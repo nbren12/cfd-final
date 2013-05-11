@@ -1,19 +1,23 @@
-subroutine advance_1d(q,nx,ny,g,dt,dx,dy)
+subroutine advance_1d(q,nx,ny,g,dt,dx,dy,ng,sx,sy)
 use rp_sw2d_roe
 
 implicit none
 
 integer nx,ny,ng,i,j
-parameter(ng = 2 )
+!parameter(ng = 2 )
 real(8), dimension(3,-1:nx+2,-1:ny+2) :: qbc
 real(8), dimension(3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: ax,ay,sx,sy
 real(8), dimension(3,3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: rx,ry
 real(8), dimension(3,nx,ny) :: q, F_x,F_y
 real(8) g,dx,dy,dt
 intent(inout) q
+intent(out) sx,sy
 
 ! Periodic BC
+
+
 qbc(:,:,:) = 0.0D0
+qbc(1,:,:) = 1.0d0
 
 qbc(:,1:nx,1:ny) = q
 qbc(:,-ng+1:0,1:ny) = q(:,nx-ng+1:nx,:)
@@ -24,7 +28,7 @@ qbc(:,1:nx,-ng+1:0) = q(:,:,ny-ng+1:ny)
 qbc(:,1:nx,ny+1:ny+ng) = q(:,:,1:ng)
 
 
-call calc_chars(ax,ay,sx,sy,rx,ry,q,nx+2*ng,ny+2*ng,g)
+call calc_chars(ax,ay,sx,sy,rx,ry,qbc,nx+2*ng,ny+2*ng,g)
 
 
 do i = 1, nx
