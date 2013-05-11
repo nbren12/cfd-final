@@ -70,7 +70,7 @@ end do
 !end do
 !
 !q = qbc(:,1:nx) - F*dt/dx - (F_tilde(:,1:nx)-F_tilde(:,0:nx-1))*dt/dx
-q = qbc(:,1:nx,1:ny) - F_x*dt/dx !- F_y*dt/dy 
+q = qbc(:,1:nx,1:ny) - F_x*dt/dx - F_y*dt/dy 
 
 end subroutine advance_1d
 

@@ -11,24 +11,29 @@ real(8) q(3,nx,ny),g
 integer nx,ny,i,j
 intent(out) ax,ay,sx,sy,rx,ry
 
-ay(:,:,:) = 0.0d0
-sy(:,:,:) = 0.0d0
-ry(:,:,:,:) = 0.0d0
+!ay(:,:,:) = 0.0d0
+!sy(:,:,:) = 0.0d0
+!ry(:,:,:,:) = 0.0d0
 
 do i = 1, nx-1
     do j = 1, ny-1
        
-        
         call roe_solve_x(ax(:,i,j),sx(:,i,j),rx(:,:,i,j),q(:,i,j),q(:,i+1,j),g)
         call roe_solve_y(ay(:,i,j),sy(:,i,j),ry(:,:,i,j),q(:,i,j),q(:,i,j+1),g)
     end do
 end do
+
+i = 50
+j = 51
+call roe_solve_y(ay(:,i,j),sy(:,i,j),ry(:,:,i,j),q(:,i,j),q(:,i,j+1),g)
+!print *, matmul(ry(:,:,i,j),ay(:,i,j))
+!print *, q(:,i,j+1) -q(:,i,j)
 end subroutine calc_chars
 
 subroutine roe_solve_y(alpha,S,R,ql,qr,g)
 implicit none
 real(8), dimension(3,3) :: R,R_p
-real(8),dimension(3) :: ql,ql_p,qr,qr_p,&
+real(8),dimension(3) :: ql,qr,&
     alpha,alpha_p,S,S_p
 
 real(8) g
@@ -38,15 +43,10 @@ intent(out) alpha,R,S
 
 p = (/1,3,2/)
 
-do i=1,3
-ql_p(i) = ql(p(i))
-qr_p(i) = qr(p(i))
-end do
-
-call roe_solve_x(alpha_p,S_p,R_p,ql_p,qr_p,g)
+call roe_solve_x(alpha_p,S_p,R_p,ql,qr,g)
 
 do i=1,3
-    R(p(i),:) = R_p(i,:)
+    R(:,p(i)) = R_p(:,i)
     alpha(p(i)) = alpha_p(i)
     S(p(i)) = S_p(i)
 end do
