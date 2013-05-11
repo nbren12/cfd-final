@@ -1,4 +1,4 @@
-subroutine advance_1d(q,nx,ny,g,dt,dx,dy,ng,ax,ay)
+subroutine advance_1d(q,nx,ny,g,dt,dx,dy,ng)
 use rp_sw2d_roe
 
 implicit none
@@ -11,7 +11,6 @@ real(8), dimension(3,3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: rx,ry
 real(8), dimension(3,nx,ny) :: q, F_x,F_y
 real(8) g,dx,dy,dt
 intent(inout) q
-intent(out) ax,ay
 
 ! Periodic BC
 
@@ -70,7 +69,7 @@ end do
 !end do
 !
 !q = qbc(:,1:nx) - F*dt/dx - (F_tilde(:,1:nx)-F_tilde(:,0:nx-1))*dt/dx
-q = qbc(:,1:nx,1:ny) - F_x*dt/dx - F_y*dt/dy 
+q = q - F_x*dt/dx - F_y*dt/dy 
 
 end subroutine advance_1d
 

@@ -23,35 +23,71 @@ do i = 1, nx-1
     end do
 end do
 
-i = 50
-j = 51
-call roe_solve_y(ay(:,i,j),sy(:,i,j),ry(:,:,i,j),q(:,i,j),q(:,i,j+1),g)
+i = 6
+j = 0
 !print *, matmul(ry(:,:,i,j),ay(:,i,j))
 !print *, q(:,i,j+1) -q(:,i,j)
 end subroutine calc_chars
 
+!subroutine roe_solve_y(alpha,S,R,ql,qr,g)
+!implicit none
+!real(8), dimension(3,3) :: R,R_p
+!real(8),dimension(3) :: ql,qr,&
+!    alpha,alpha_p,S,S_p
+!
+!real(8) g
+!integer i,p(3)
+!intent(in) ql,qr
+!intent(out) alpha,R,S
+!
+!p = (/1,3,2/)
+!
+!call roe_solve_x(alpha_p,S_p,R_p,ql,qr,g)
+!
+!do i=1,3
+!    R(:,p(i)) = R_p(:,i)
+!    alpha(p(i)) = alpha_p(i)
+!    S(p(i)) = S_p(i)
+!end do
+!do i=1,3
+!    R(p(i),:) = R(i,:)
+!end do
+!
+!end subroutine roe_solve_y
+!
 subroutine roe_solve_y(alpha,S,R,ql,qr,g)
 implicit none
-real(8), dimension(3,3) :: R,R_p
-real(8),dimension(3) :: ql,qr,&
-    alpha,alpha_p,S,S_p
+real(8), dimension(3,3) :: R,L
+real(8),dimension(3) :: ql,qr,alpha,S
+real(8) g,u_hat,v_hat,h_bar,c_hat
 
-real(8) g
-integer i,p(3)
-intent(in) ql,qr
+integer i
 intent(out) alpha,R,S
 
-p = (/1,3,2/)
+u_hat =( sqrt(ql(1))*ql(2)/ql(1) + sqrt(qr(1))*qr(2)/qr(1))&
+        /(sqrt(qr(1))+sqrt(ql(1)))
+v_hat =( sqrt(ql(1))*ql(3)/ql(1) + sqrt(qr(1))*qr(3)/qr(1))&
+        /(sqrt(qr(1))+sqrt(ql(1)))
 
-call roe_solve_x(alpha_p,S_p,R_p,ql,qr,g)
+h_bar = (ql(1)+qr(1))/2.0
 
-do i=1,3
-    R(:,p(i)) = R_p(:,i)
-    alpha(p(i)) = alpha_p(i)
-    S(p(i)) = S_p(i)
-end do
+c_hat = sqrt(g*h_bar)
 
-end subroutine roe_solve_y
+R(:,1) = (/0.0D0,1.0d0,0.0d0/)
+R(:,2) = (/1.0D0,u_hat,v_hat-c_hat/)
+R(:,3) = (/1.0D0,u_hat,v_hat+c_hat/)
+
+
+L(1,:) = (/-u_hat,1.0d0,0.0d0/)
+L(2,:) = (/v_hat+c_hat,0.0d0,-1.0D0/)/2.0d0/c_hat
+L(3,:) = (/-v_hat+c_hat,0.0d0,1.0D0/)/2.0d0/c_hat
+
+S = (/v_hat,v_hat-c_hat,v_hat+c_hat/)
+
+
+alpha = matmul(L,qr-ql)
+
+end subroutine roe_solve_y  
 
 subroutine roe_solve_x(alpha,S,R,ql,qr,g)
 implicit none
