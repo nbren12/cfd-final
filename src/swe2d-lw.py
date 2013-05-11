@@ -26,13 +26,14 @@ ng = 2
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 y = pyclaw.Dimension('y',-10.0,10.0,nx)
 
+domain = pyclaw.Domain((x,y))
+state  = pyclaw.State(domain,3)
+
 dx,dy = state.grid.delta
 dt = dx / 10
 T  = 1.0
 nt = int(T/dt)
 
-domain = pyclaw.Domain((x,y))
-state  = pyclaw.State(domain,3)
 
 # Initial Data for 1D Riemann Problem
 h0 = (2-np.sign(x.centers))
@@ -44,8 +45,8 @@ state.q[1,:,:] = (u0*h0)[:,None]
 state.q[2,:,:] = (v0*h0)[:,None]
 
 for i in xrange(1):
-    # qbc = advance_1d(state.q,g,dt,dx)
+    qbc = advance_1d(state.q,g,dt,dx,dy)
     pass
 
-# plt.plot(state.grid.c_centers[0],state.q[0,:])
-# plt.show()
+plt.contourf(state.grid.c_centers[0],state.grid.c_centers[1],state.q[0,:,:])
+plt.show()
