@@ -1,18 +1,16 @@
-subroutine advance_1d(q,nx,ny,g,dt,dx,dy,qbc)
+subroutine advance_1d(q,nx,ny,g,dt,dx,dy)
 use rp_sw2d_roe
 
-implicit double precision (a-h, o-z) 
+implicit none
 
-integer nx,ng,i,j
-parameter(ng = 2,nc =3 )
-real(8), dimension(nc,-1:nx+2,-1:ny+2) :: qbc
-real(8), dimension(nc,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: alpha,S
-real(8), dimension(nc,nc,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: L,R
-real(8), dimension(nc,nx,ny) :: q, F
-dimension F_tilde(2,0:nx)
-real(8), dimension(2) :: ql ,qr,alpha_tilde,theta
+integer nx,ny,ng,i,j
+parameter(ng = 2 )
+real(8), dimension(3,-1:nx+2,-1:ny+2) :: qbc
+real(8), dimension(3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: ax,ay,sx,sy
+real(8), dimension(3,3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: rx,ry
+real(8), dimension(3,nx,ny) :: q, F_x,F_y
+real(8) g,dx,dy,dt
 intent(inout) q
-intent(out) qbc
 
 ! Periodic BC
 qbc(:,:,:) = 0.0D0
@@ -26,7 +24,20 @@ qbc(:,1:nx,-ng+1:0) = q(:,:,ny-ng+1:ny)
 qbc(:,1:nx,ny+1:ny+ng) = q(:,:,1:ng)
 
 
-!call calc_chars(L,S,R,qbc(:,-ng+1:ng+nx-1),qbc(:,-ng+2:nx+ng),nx+2*ng-1,g,dt,dx)
+call calc_chars(ax,ay,sx,sy,rx,ry,q,nx+2*ng,ny+2*ng,g)
+
+
+do i = 1, nx
+do j = 1, ny
+
+    ! Calculate firt order flux-difference
+    F_x(:,i,j) = matmul(rx(:,:,i-1,j),ax(:,i-1,j)*max(sx(:,i,j-1),0.0D0))&
+        +matmul(rx(:,:,i,j),ax(:,i,j)*min(sx(:,i,j),0.0D0))
+
+    F_y(:,i,j) = matmul(ry(:,:,i,j-1),ay(:,i,j-1)*max(sy(:,i,j-1),0.0D0))&
+        +matmul(ry(:,:,i,j),ay(:,i,j)*min(sy(:,i,j),0.00))
+end do
+end do
 !call calc_update(L(:,:,0:nx),S(:,0:nx),R(:,:,0:nx),qbc(:,0:nx),qbc(:,1:nx+1),nx+1,g,dt,dx,F)
 !
 !! Calculate the fluctuations
@@ -54,7 +65,8 @@ qbc(:,1:nx,ny+1:ny+ng) = q(:,:,1:ng)
 !
 !end do
 !
-!    q = qbc(:,1:nx) - F*dt/dx - (F_tilde(:,1:nx)-F_tilde(:,0:nx-1))*dt/dx
+!q = qbc(:,1:nx) - F*dt/dx - (F_tilde(:,1:nx)-F_tilde(:,0:nx-1))*dt/dx
+q = qbc(:,1:nx,1:ny) - F_x*dt/dx - F_y*dt/dy 
 
 end subroutine advance_1d
 

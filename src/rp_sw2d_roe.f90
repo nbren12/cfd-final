@@ -1,34 +1,13 @@
 module rp_sw2d_roe
 
 contains
-
-subroutine calc_update(L,S,R,ql,qr,n,g,dt,dx,F)
-implicit none
-real(8) L(3,3,n),R(3,3,n),S(3,n),alpha(3,n),F(3,n-1)
-real(8), dimension(3,n) :: ql ,qr
-real(8) :: dt,dx,g
-integer n,i
-intent(out) F
-
-do i = 1,n
-    alpha(:,i) = matmul(L(:,:,i),qr(:,i)-ql(:,i))
-end do
-
-do i = 1,n-1
-    ! Calculate firt order flux-difference
-    F(:,i) = matmul(R(:,:,i),alpha(:,i)*max(S(:,i),0.0D0))&
-        +matmul(R(:,:,i+1),alpha(:,i+1)*min(S(:,i+1),0.0D0))
-end do
-
-
-end subroutine calc_update
-
-subroutine calc_chars(ax,ay,sx,sy,rx,ry,q,nx,ny,g,dt,dx)
+    
+subroutine calc_chars(ax,ay,sx,sy,rx,ry,q,nx,ny,g)
 implicit none
 
 real(8),dimension(3,nx-1,ny-1) :: ax,ay,sx,sy 
 real(8),dimension(3,3,nx-1,ny-1) :: rx,ry
-real(8) q(3,nx,ny),g,dt,dx
+real(8) q(3,nx,ny),g
 integer nx,ny,i,j
 intent(out) ax,ay,sx,sy,rx,ry
 
