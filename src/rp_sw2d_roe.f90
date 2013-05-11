@@ -11,13 +11,18 @@ real(8) q(3,nx,ny),g
 integer nx,ny,i,j
 intent(out) ax,ay,sx,sy,rx,ry
 
+ay(:,:,:) = 0.0d0
+sy(:,:,:) = 0.0d0
+ry(:,:,:,:) = 0.0d0
+
 do i = 1, nx-1
     do j = 1, ny-1
+       
+        
         call roe_solve_x(ax(:,i,j),sx(:,i,j),rx(:,:,i,j),q(:,i,j),q(:,i+1,j),g)
         call roe_solve_y(ay(:,i,j),sy(:,i,j),ry(:,:,i,j),q(:,i,j),q(:,i,j+1),g)
     end do
 end do
-
 end subroutine calc_chars
 
 subroutine roe_solve_y(alpha,S,R,ql,qr,g)
@@ -28,6 +33,7 @@ real(8),dimension(3) :: ql,ql_p,qr,qr_p,&
 
 real(8) g
 integer i,p(3)
+intent(in) ql,qr
 intent(out) alpha,R,S
 
 p = (/1,3,2/)
@@ -66,15 +72,15 @@ h_bar = (ql(1)+qr(1))/2.0
 c_hat = sqrt(g*h_bar)
 
 R(:,1) = (/0.0D0,0.0D0,1.0d0/)
-R(:,2) = (/1.0D0,u_hat+c_hat,v_hat/)
-R(:,3) = (/1.0D0,u_hat-c_hat,v_hat/)
+R(:,2) = (/1.0D0,u_hat-c_hat,v_hat/)
+R(:,3) = (/1.0D0,u_hat+c_hat,v_hat/)
 
 
 L(1,:) = (/-v_hat,0.0d0,1.0d0/)
 L(2,:) = (/u_hat+c_hat,-1.0D0,0.0d0/)/2.0d0/c_hat
 L(3,:) = (/-u_hat+c_hat,1.0D0,0.0d0/)/2.0d0/c_hat
 
-S = (/u_hat,u_hat+c_hat,u_hat-c_hat/)
+S = (/u_hat,u_hat-c_hat,u_hat+c_hat/)
 
 
 alpha = matmul(L,qr-ql)

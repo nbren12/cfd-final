@@ -1,4 +1,4 @@
-subroutine advance_1d(q,nx,ny,g,dt,dx,dy,ng,sx,sy)
+subroutine advance_1d(q,nx,ny,g,dt,dx,dy,ng,ax,ay)
 use rp_sw2d_roe
 
 implicit none
@@ -11,7 +11,7 @@ real(8), dimension(3,3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: rx,ry
 real(8), dimension(3,nx,ny) :: q, F_x,F_y
 real(8) g,dx,dy,dt
 intent(inout) q
-intent(out) sx,sy
+intent(out) ax,ay
 
 ! Periodic BC
 
@@ -35,7 +35,7 @@ do i = 1, nx
 do j = 1, ny
 
     ! Calculate firt order flux-difference
-    F_x(:,i,j) = matmul(rx(:,:,i-1,j),ax(:,i-1,j)*max(sx(:,i,j-1),0.0D0))&
+    F_x(:,i,j) = matmul(rx(:,:,i-1,j),ax(:,i-1,j)*max(sx(:,i-1,j),0.0D0))&
         +matmul(rx(:,:,i,j),ax(:,i,j)*min(sx(:,i,j),0.0D0))
 
     F_y(:,i,j) = matmul(ry(:,:,i,j-1),ay(:,i,j-1)*max(sy(:,i,j-1),0.0D0))&
@@ -70,7 +70,7 @@ end do
 !end do
 !
 !q = qbc(:,1:nx) - F*dt/dx - (F_tilde(:,1:nx)-F_tilde(:,0:nx-1))*dt/dx
-q = qbc(:,1:nx,1:ny) - F_x*dt/dx - F_y*dt/dy 
+q = qbc(:,1:nx,1:ny) - F_x*dt/dx !- F_y*dt/dy 
 
 end subroutine advance_1d
 

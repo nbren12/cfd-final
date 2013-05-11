@@ -44,9 +44,8 @@ state.q[0,:,:] = h0[:,None]
 state.q[1,:,:] = (u0*h0)[:,None]
 state.q[2,:,:] = (v0*h0)[:,None]
 
-for i in xrange(1):
-    qbc = advance_1d(state.q,g,dt,dx,dy)
-    pass
-
+for i in xrange(nt):
+    ax,ay =  advance_1d(state.q,g,dt,dx,dy,2)
+plt.ion()
 plt.contourf(state.grid.c_centers[0],state.grid.c_centers[1],state.q[0,:,:])
 plt.show()
