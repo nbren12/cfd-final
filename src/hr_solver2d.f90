@@ -1,10 +1,10 @@
-subroutine advance_1d(q,nx,ny,g,dt,dx,dy,ng)
+subroutine advance_sw(q,nx,ny,g,dt,dx,dy)
 use rp_sw2d_roe
 
 implicit none
 
 integer nx,ny,ng,i,j
-!parameter(ng = 2 )
+parameter( ng = 2)
 real(8), dimension(3,-1:nx+2,-1:ny+2) :: qbc
 real(8), dimension(3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: ax,ay,sx,sy
 real(8), dimension(3,3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: rx,ry
@@ -92,5 +92,24 @@ q = q - (dt/dx) * ( fp(:,0:nx-1,1:ny) + fm(:,1:nx,1:ny))&
     -(dt/dx) * ( f_c(:,1:nx,1:ny) - f_c(:,0:nx-1,1:ny))&
     -(dt/dx) * ( g_c(:,1:nx,1:ny) - g_c(:,1:nx,0:ny-1))
 
-end subroutine advance_1d
+end subroutine advance_sw
+
+subroutine advance_coriolis(q,f,nx,ny,dt)
+implicit none
+integer nx,ny
+real(8), dimension(3,nx,ny) :: q,qm
+real(8) g,dt,f(nx,ny)
+intent(in) f
+intent(inout) q
+
+qm = q(:,:,:)
+
+qm(2,:,:) = q(2,:,:) + (dt/2.0d0)*f*q(3,:,:)
+qm(3,:,:) = q(3,:,:) - (dt/2.0d0)*f*q(2,:,:)
+
+q(2,:,:) = q(2,:,:) + (dt/2.0d0)*f*qm(3,:,:)
+q(3,:,:) = q(3,:,:) - (dt/2.0d0)*f*qm(2,:,:)
+
+
+end subroutine advance_coriolis
 
