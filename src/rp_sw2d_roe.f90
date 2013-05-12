@@ -96,6 +96,7 @@ real(8), dimension(3,3) :: R,L
 real(8),dimension(3) :: ql,qr,alpha,S
 real(8) g,u_hat,v_hat,h_bar,c_hat
 real(8), optional,intent(in),dimension(3):: a
+real(8) ul,cl,sl,ur,cr,sr,bm,bp
 integer i
 intent(out) alpha,R,S
 
@@ -127,6 +128,67 @@ else
 end if
 
 end subroutine roe_solve_x  
+
+subroutine efix_y_pm(a,s,r,ql,qr,g,fm,fp)
+implicit none 
+real(8) :: a(3), r(3,3), s(3),fm(3),fp(3),&
+    ql(3),qr(3),vl,vr,sl(3),sr(3),cl,cr,sm(3),sp(3),g
+intent(out) fm,fp
+
+vl = ql(3)/ql(1)
+cl = sqrt(g*ql(1))
+sl = (/ vl,vl-cl,vl+cl /)
+
+vr = qr(3)/qr(1)
+cr = sqrt(g*qr(1))
+sr = (/ vr,vr-cr,vr+cr /)
+
+call calc_entropy_waves(sm,sp,s,sl,sr)
+
+fp = matmul(r,a*sp)
+fm =matmul(r,a*sm)
+
+end subroutine efix_y_pm
+
+subroutine efix_x_pm(a,s,r,ql,qr,g,fm,fp)
+implicit none 
+real(8) :: a(3), r(3,3), s(3),fm(3),fp(3),&
+    ql(3),qr(3),ul,ur,sl(3),sr(3),cl,cr,sm(3),sp(3),g
+intent(out) fm,fp
+
+ul = ql(2)/ql(1)
+cl = sqrt(g*ql(1))
+sl = (/ ul,ul-cl,ul+cl /)
+
+ur = qr(2)/qr(1)
+cr = sqrt(g*qr(1))
+sr = (/ ur,ur-cr,ur+cr /)
+
+call calc_entropy_waves(sm,sp,s,sl,sr)
+
+fp = matmul(r,a*sp)
+fm =matmul(r,a*sm)
+
+end subroutine efix_x_pm
+
+subroutine calc_entropy_waves(sm,sp,s,sl,sr)
+implicit none 
+real(8) ::  s(3),sl(3),sr(3),sm(3),sp(3),b
+integer i
+intent(out) sm,sp
+
+do i = 1,3
+if ((sl(i) .lt. 0.0d0) .and. (sr(i) .gt. 0.0d0) )then
+    b = ( sr(i) -s(i))/(sr(i) - sl(i))
+    sm(i) = b * sl(i)
+    sp(i) = (1-b) * sr(i)
+else
+    sm(i) = min(s(i),0.0d0)
+    sp(i) = max(s(i),0.0d0)
+end if
+end do
+    
+end subroutine calc_entropy_waves
 
 function PHI (theta) result(y)
 implicit double precision (a-z)

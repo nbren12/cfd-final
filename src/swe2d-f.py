@@ -15,7 +15,7 @@ from ipdb import set_trace as st
 from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
-from hr_solver2d import advance_1d
+from hr_solver2d import advance_sw, advance_coriolis
 
 g = 9.812
 nx = 64
@@ -70,7 +70,7 @@ for i in xrange(nt):
         frame+=1
     qm = state.q
     print i
-    advance_1d(state.q,g,dt,dx,dy,2)
-
+    advance_sw(state.q,g,dt,dx,dy)
+    advance_coriolis(state.q,f,g,dt,dx)
 
 plt.show()
