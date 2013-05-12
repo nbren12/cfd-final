@@ -42,8 +42,8 @@ nt = int(T/dt)
 h0 = np.ones((nx,ny))
 # h0[nx/2-nx/3:nx/2+nx/3,ny/2-ny/3:ny/2+ny/3] = 3
 # h0[40:60,40:60] = 3
-# h0 += np.exp(-reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers)))
-h0 += (reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers))< 3)
+h0 += np.exp(-reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers)))
+# h0 += (reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers))< 3)
 u0 = np.zeros(domain.grid.num_cells)
 v0 = np.zeros(domain.grid.num_cells)
 
