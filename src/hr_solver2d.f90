@@ -1,4 +1,4 @@
-subroutine advance_1d(q,nx,ny,g,dt,dx,dy,ng)
+subroutine advance_1d(q,nx,ny,g,dt,dx,dy,ng,f_c)
 use rp_sw2d_roe
 
 implicit none
@@ -14,6 +14,7 @@ real(8) g,dx,dy,dt
 
 real(8),dimension(3,-1:nx+1,-1:ny+1) ::  fm,fp,f_c,gm,gp,g_c
 intent(inout) q
+intent(out) f_c
 
 ! Periodic BC
 qbc(:,:,:) = 0.0D0
@@ -43,11 +44,12 @@ call calc_pm(ay(:,i,j),sy(:,i,j),ry(:,:,i,j),gm(:,i,j),gp(:,i,j))
 end do
 end do
 
-! Calculate Correction for right Going
+! Calculate Second Order Correction
 do i = 0, nx
 do j = 0, ny
 
-!call calc_correction(ax(:,i,j),sx(:,i,j),rx(:,:,i,j),f_c(:,i,j))
+call calc_correction(ax(:,i-1:i+1,j),sx(:,i,j),rx(:,:,i,j),f_c(:,i,j),dt,dx)
+call calc_correction(ay(:,i,j-1:j+1),sy(:,i,j),ry(:,:,i,j),g_c(:,i,j),dt,dx)
 
 end do
 end do
@@ -56,7 +58,8 @@ end do
 
 
 q = q - (dt/dx) * ( fp(:,0:nx-1,1:ny) + fm(:,1:nx,1:ny))&
-    -(dt/dx) * ( gp(:,1:nx,0:ny-1) + gm(:,1:nx,1:ny) )
+    -(dt/dx) * ( gp(:,1:nx,0:ny-1) + gm(:,1:nx,1:ny) )&
+    -(dt/dx) * ( f_c(:,1:nx,1:ny) - f_c(:,0:nx-1,1:ny) )
 
 end subroutine advance_1d
 

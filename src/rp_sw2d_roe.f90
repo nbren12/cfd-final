@@ -9,10 +9,11 @@ fp = matmul(r,a*max(s(:),0.0D0))
 fm =matmul(r,a*min(s(:),0.0D0))
 end subroutine calc_pm
 
-subroutine calc_correction(a,s,r,f_c)
+subroutine calc_correction(a,s,r,f_c,dt,dx)
+implicit none
 real(8) a(3,-1:1),s(3),r(3,3)
-real(8) theta(3), a_c(3)
-
+real(8) theta(3), a_c(3),dt,dx
+integer j
 real(8), dimension(3), intent(inout) :: f_c
 
 do j=1,3
