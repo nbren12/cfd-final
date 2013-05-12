@@ -1,6 +1,3 @@
-[submodule "BoxLib"]
-	path = BoxLib
-	url = https://ccse.lbl.gov/pub/Downloads/BoxLib.git
 [submodule "pyclaw"]
 	path = pyclaw
 	url = https://github.com/clawpack/pyclaw.git
