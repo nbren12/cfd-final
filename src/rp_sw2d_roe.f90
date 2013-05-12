@@ -43,10 +43,6 @@ real(8) q(3,nx,ny),g
 integer nx,ny,i,j
 intent(out) ax,ay,sx,sy,rx,ry
 
-!ay(:,:,:) = 0.0d0
-!sy(:,:,:) = 0.0d0
-!ry(:,:,:,:) = 0.0d0
-
 do i = 1, nx-1
     do j = 1, ny-1
        
@@ -55,38 +51,8 @@ do i = 1, nx-1
     end do
 end do
 
-i = 6
-j = 0
-!print *, matmul(ry(:,:,i,j),ay(:,i,j))
-!print *, q(:,i,j+1) -q(:,i,j)
 end subroutine calc_chars
 
-!subroutine roe_solve_y(alpha,S,R,ql,qr,g)
-!implicit none
-!real(8), dimension(3,3) :: R,R_p
-!real(8),dimension(3) :: ql,qr,&
-!    alpha,alpha_p,S,S_p
-!
-!real(8) g
-!integer i,p(3)
-!intent(in) ql,qr
-!intent(out) alpha,R,S
-!
-!p = (/1,3,2/)
-!
-!call roe_solve_x(alpha_p,S_p,R_p,ql,qr,g)
-!
-!do i=1,3
-!    R(:,p(i)) = R_p(:,i)
-!    alpha(p(i)) = alpha_p(i)
-!    S(p(i)) = S_p(i)
-!end do
-!do i=1,3
-!    R(p(i),:) = R(i,:)
-!end do
-!
-!end subroutine roe_solve_y
-!
 subroutine roe_solve_y(alpha,S,R,ql,qr,g,a)
 implicit none
 real(8), dimension(3,3) :: R,L
@@ -164,7 +130,6 @@ end subroutine roe_solve_x
 
 function PHI (theta) result(y)
 implicit double precision (a-z)
-!theta,tmp,y
 intent(in) theta
 
 
