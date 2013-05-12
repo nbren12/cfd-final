@@ -1,4 +1,4 @@
-subroutine advance_1d(q,nx,ny,g,dt,dx,dy,ng,f_c)
+subroutine advance_1d(q,nx,ny,g,dt,dx,dy,ng)
 use rp_sw2d_roe
 
 implicit none
@@ -8,7 +8,7 @@ integer nx,ny,ng,i,j
 real(8), dimension(3,-1:nx+2,-1:ny+2) :: qbc
 real(8), dimension(3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: ax,ay,sx,sy
 real(8), dimension(3,3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: rx,ry
-real(8), dimension(3,nx,ny) :: q, F_x,F_y
+real(8), dimension(3,nx,ny) :: q
 real(8) g,dx,dy,dt
 
 !Temporary variables
@@ -17,7 +17,6 @@ real(8) tp(3),tm(3),ta(3),ts(3),tr(3,3)
 
 real(8),dimension(3,-1:nx+1,-1:ny+1) ::  fm,fp,f_c,gm,gp,g_c
 intent(inout) q
-intent(out) f_c
 
 ! Periodic BC
 qbc(:,:,:) = 0.0D0
@@ -87,9 +86,6 @@ f_c(:,i-1,j) = f_c(:,i-1,j) - (dt/2.0d0/dx) * tm
 
 end do
 end do
-
-
-
 
 q = q - (dt/dx) * ( fp(:,0:nx-1,1:ny) + fm(:,1:nx,1:ny))&
     -(dt/dx) * ( gp(:,1:nx,0:ny-1) + gm(:,1:nx,1:ny) )&
