@@ -32,7 +32,6 @@ call calc_chars(ax,ay,sx,sy,rx,ry,qbc,nx+2*ng,ny+2*ng,g)
 
 do i = 1, nx
 do j = 1, ny
-
     ! Calculate firt order flux-difference
     F_x(:,i,j) = matmul(rx(:,:,i-1,j),ax(:,i-1,j)*max(sx(:,i-1,j),0.0D0))&
         +matmul(rx(:,:,i,j),ax(:,i,j)*min(sx(:,i,j),0.0D0))
@@ -68,7 +67,6 @@ end do
 !
 !end do
 !
-!q = qbc(:,1:nx) - F*dt/dx - (F_tilde(:,1:nx)-F_tilde(:,0:nx-1))*dt/dx
 q = q - F_x*dt/dx - F_y*dt/dy 
 
 end subroutine advance_1d
