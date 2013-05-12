@@ -8,7 +8,8 @@ FOBJ = $(SRC:.f90=_f2py.so)
 
 SOLVERS = hr_solver1d.so adv_weno.so weno_solver1d.so hr_solver2d.so
 
-all: $(SOLVERS) $(FOBJ)
+all: $(SOLVERS)
+f2py: $(FOBJ)
 
 $(SOLVERS) : %.so : $(OBJ) %.f90 
 	$(F2PY) -c -m $(subst .so,,$@) $^
