@@ -182,9 +182,12 @@ if ((sl(i) .lt. 0.0d0) .and. (sr(i) .gt. 0.0d0) )then
     b = ( sr(i) -s(i))/(sr(i) - sl(i))
     sm(i) = b * sl(i)
     sp(i) = (1-b) * sr(i)
+
+    !print *, "Entropy Fixed!"
 else
     sm(i) = min(s(i),0.0d0)
     sp(i) = max(s(i),0.0d0)
+    !print *, "Entropy Not Fixed!"
 end if
 end do
     

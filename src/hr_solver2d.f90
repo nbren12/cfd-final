@@ -1,9 +1,10 @@
-subroutine advance_sw(q,nx,ny,g,dt,dx,dy)
+subroutine advance_sw(q,nx,ny,g,dt,dx,dy,efix)
 use rp_sw2d_roe
 
 implicit none
 
 integer nx,ny,ng,i,j
+logical efix
 parameter( ng = 2)
 real(8), dimension(3,-1:nx+2,-1:ny+2) :: qbc
 real(8), dimension(3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: ax,ay,sx,sy
@@ -40,8 +41,15 @@ do j = -1,ny+1
 call roe_solve_x(ax(:,i,j),sx(:,i,j),rx(:,:,i,j),qbc(:,i,j),qbc(:,i+1,j),g)
 call roe_solve_y(ay(:,i,j),sy(:,i,j),ry(:,:,i,j),qbc(:,i,j),qbc(:,i,j+1),g)
 
+if (efix) then
+call efix_x_pm(ax(:,i,j),sx(:,i,j),rx(:,:,i,j),qbc(:,i,j),qbc(:,i+1,j),g,&
+    fm(:,i,j),fp(:,i,j))
+call efix_y_pm(ay(:,i,j),sy(:,i,j),ry(:,:,i,j),qbc(:,i,j),qbc(:,i,j+1),g,&
+    gm(:,i,j),gp(:,i,j))
+else 
 call calc_pm(ax(:,i,j),sx(:,i,j),rx(:,:,i,j),fm(:,i,j),fp(:,i,j))
 call calc_pm(ay(:,i,j),sy(:,i,j),ry(:,:,i,j),gm(:,i,j),gp(:,i,j))
+end if
 
 end do
 end do
