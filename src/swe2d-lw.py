@@ -38,7 +38,7 @@ state  = pyclaw.State(domain,3)
 
 dx,dy = state.grid.delta
 dt = dx / 10
-T  = 25
+T  = 40
 nt = int(T/dt)
 
 
@@ -68,9 +68,9 @@ state.q[2,:,:] = (v0*h0)
 # axl = axl.ravel()
 # axl1 = axl1.ravel()
 
-vs = VideoSink((nx,ny),filename='bone')
+vs = VideoSink((nx-1,ny-1),filename='bone')
 from matplotlib import cm
-cmm = cm.ScalarMappable(cmap=cm.jet)
+cmm = cm.ScalarMappable(cmap=cm.bone)
 
 mmin = 0
 mmax = 2
@@ -85,8 +85,8 @@ for i in xrange(nt):
         cmm.set_array(u)
         cmm.autoscale()
 
-        # w = (v[1:,1:] -v[:-1,1:])/dy -(u[1:,1:]-u[1:,:-1])/dx
-        writeme = cmm.to_rgba(u,bytes=True)
+        w = (v[1:,1:] -v[:-1,1:])/dy -(u[1:,1:]-u[1:,:-1])/dx
+        writeme = cmm.to_rgba(w,bytes=True)
         pil = Image.fromarray(writeme)
         vs.run(pil)
 
