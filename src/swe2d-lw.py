@@ -23,15 +23,15 @@ from PIL import Image
 
 g = .1
 H = 100
-nx = 100
-ny = 100
+nx = 201
+ny = 101
 ng = 2
 
 nframes = 10
 
 #   First Dimension is x, Second Dimension is y
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
-y = pyclaw.Dimension('y',-10.0,10.0,nx)
+y = pyclaw.Dimension('y',-5.0,5.0,ny)
 
 domain = pyclaw.Domain((x,y))
 state  = pyclaw.State(domain,3)
@@ -49,9 +49,9 @@ h0 = np.ones((nx,ny))*H #   + np.sign(x.centers)*H*.1
 # h0[40:60,40:60] = 3
 # h0 += 2*np.exp(-reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers)))
 # h0 += 2*(reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers))< 4)
-# u0 = np.zeros(domain.grid.num_cells)
-u0 = -np.ones(domain.grid.num_cells)*np.sqrt(g*H)*2
-u0[:,ny/2:ny/2+ny/6] = np.sqrt(g*H)*2
+u0 = np.zeros(domain.grid.num_cells)
+# u0 = +np.ones(domain.grid.num_cells)*np.sqrt(g*H)*.1
+u0[:,ny/2:ny/2+ny/6] = +np.sqrt(g*H)*.1
 u0[:,ny/2:] = np.sqrt(g*H)*2
 v0 = np.zeros(domain.grid.num_cells)
 
@@ -71,6 +71,12 @@ state.q[2,:,:] = (v0*h0)
 vs = VideoSink((nx-1,ny-1),filename='bone')
 from matplotlib import cm
 cmm = cm.ScalarMappable(cmap=cm.bone)
+u = state.q[1,:,:]/state.q[0,:,:]
+v = state.q[2,:,:]/state.q[0,:,:]
+
+w = (v[1:,1:] -v[:-1,1:])/dy -(u[1:,1:]-u[1:,:-1])/dx
+cmm.set_array(w*.2)
+cmm.autoscale()
 
 mmin = 0
 mmax = 2
@@ -79,16 +85,18 @@ frame= 0
 fig = plt.figure()
 j = 0
 for i in xrange(nt):
-    if i%5 ==0:
+    j+=1
+    if j*dt > .05:
+        j=0
         u = state.q[1,:,:]/state.q[0,:,:]
         v = state.q[2,:,:]/state.q[0,:,:]
-        cmm.set_array(u)
-        cmm.autoscale()
 
         w = (v[1:,1:] -v[:-1,1:])/dy -(u[1:,1:]-u[1:,:-1])/dx
-        writeme = cmm.to_rgba(w,bytes=True)
+        if i%(5*4): cmm.set_array(w)
+        writeme = cmm.to_rgba(w.T,bytes=True)
         pil = Image.fromarray(writeme)
         vs.run(pil)
+
 
     # if i%dframe == 0 and frame <10:
     #     axl[frame].contourf(xx,yy,state.q[0,:,:],np.linspace(mmin,mmax,12), vmin=mmin,vmax=mmax)
