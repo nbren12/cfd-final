@@ -17,9 +17,14 @@ from clawpack import pyclaw
 from matplotlib import pyplot as plt
 from hr_solver2d import advance_sw
 
-g = 9.812
-nx = 64
-ny = 64
+import os
+from SaveVideo import *
+from PIL import Image
+
+g = .1
+H = 100
+nx = 100
+ny = 100
 ng = 2
 
 nframes = 10
@@ -33,18 +38,21 @@ state  = pyclaw.State(domain,3)
 
 dx,dy = state.grid.delta
 dt = dx / 10
-T  = 1.0
+T  = 25
 nt = int(T/dt)
 
 
 # Initial Data for 1D Riemann Problem
 # h0 = (2-np.sign(x.centers))[:,None] # Dam Break
-h0 = np.ones((nx,ny))
+h0 = np.ones((nx,ny))*H #   + np.sign(x.centers)*H*.1
 # h0[nx/2-nx/3:nx/2+nx/3,ny/2-ny/3:ny/2+ny/3] = 3
 # h0[40:60,40:60] = 3
-h0 += np.exp(-reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers)))
-# h0 += (reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers))< 3)
-u0 = np.zeros(domain.grid.num_cells)
+# h0 += 2*np.exp(-reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers)))
+# h0 += 2*(reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers))< 4)
+# u0 = np.zeros(domain.grid.num_cells)
+u0 = -np.ones(domain.grid.num_cells)*np.sqrt(g*H)*2
+u0[:,ny/2:ny/2+ny/6] = np.sqrt(g*H)*2
+u0[:,ny/2:] = np.sqrt(g*H)*2
 v0 = np.zeros(domain.grid.num_cells)
 
 
@@ -55,23 +63,50 @@ state.q[1,:,:] = (u0*h0)
 state.q[2,:,:] = (v0*h0)
 
 
-fig, axl = plt.subplots(ncols=nframes/2,nrows=2,figsize=(12,5))
-axl = axl.ravel()
+# fig, axl = plt.subplots(ncols=nframes/2,nrows=2,figsize=(12,5))
+# fig1, axl1 = plt.subplots(ncols=nframes/2,nrows=2,figsize=(12,5))
+# axl = axl.ravel()
+# axl1 = axl1.ravel()
 
+vs = VideoSink((nx,ny),filename='bone')
+from matplotlib import cm
+cmm = cm.ScalarMappable(cmap=cm.jet)
+
+mmin = 0
+mmax = 2
 dframe = nt/nframes
 frame= 0
-
+fig = plt.figure()
+j = 0
 for i in xrange(nt):
-    if i%dframe == 0 and frame <10:
-        axl[frame].contourf(xx,yy,state.q[0,:,:])
-        axl[frame].set_aspect('equal')
-        axl[frame].set_title('T = %.2f'%(i*dt))
-        # axl[i].
-        frame+=1
-    qm = state.q
-    print i
-    advance_sw(state.q,g,dt,dx,dy,True)
+    if i%5 ==0:
+        u = state.q[1,:,:]/state.q[0,:,:]
+        v = state.q[2,:,:]/state.q[0,:,:]
+        cmm.set_array(u)
+        cmm.autoscale()
 
-fig1 = plt.figure()
-plt.plot(x.centers,state.q[0,:,ny/2])
-plt.show()
+        # w = (v[1:,1:] -v[:-1,1:])/dy -(u[1:,1:]-u[1:,:-1])/dx
+        writeme = cmm.to_rgba(u,bytes=True)
+        pil = Image.fromarray(writeme)
+        vs.run(pil)
+
+    # if i%dframe == 0 and frame <10:
+    #     axl[frame].contourf(xx,yy,state.q[0,:,:],np.linspace(mmin,mmax,12), vmin=mmin,vmax=mmax)
+    #     axl[frame].set_aspect('equal')
+
+    #     axl1[frame].plot(x.centers,state.q[0,:,ny/2],'r')
+    #     axl1[frame].set_xlim([-10,10])
+    #     axl1[frame].set_ylim([mmin,mmax])
+    #     axl1[frame].set_title('T = %.2f'%(i*dt))
+    #     if frame <5:
+    #         axl[frame].get_xaxis().set_visible(False)
+    #         axl1[frame].get_xaxis().set_visible(False)
+    #     if frame not in [0,5]:
+    #         axl[frame].get_yaxis().set_visible(False)
+    #         axl1[frame].get_yaxis().set_visible(False)
+    #     # axl[i].
+    #     frame+=1
+    # qm = state.q
+    advance_sw(state.q,g,dt,dx,dy,efix=True,hr=True)
+vs.close()
+# plt.show()

@@ -1,10 +1,9 @@
-subroutine advance_sw(q,nx,ny,g,dt,dx,dy,efix)
+subroutine advance_sw(q,nx,ny,g,dt,dx,dy,efix,hr)
 use rp_sw2d_roe
-
 implicit none
 
 integer nx,ny,ng,i,j
-logical efix
+logical, intent(in),optional  :: efix,hr
 parameter( ng = 2)
 real(8), dimension(3,-1:nx+2,-1:ny+2) :: qbc
 real(8), dimension(3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: ax,ay,sx,sy
@@ -18,6 +17,15 @@ real(8) tp(3),tm(3),ta(3),ts(3),tr(3,3)
 
 real(8),dimension(3,-1:nx+1,-1:ny+1) ::  fm,fp,f_c,gm,gp,g_c
 intent(inout) q
+!intent(in), optional :: efix,hr
+
+!if (.not. present(efix)) then
+!    efix = .false.
+!end if
+!
+!if (.not. present(hr)) then
+!    hr = .false.
+!end if
 
 ! Periodic BC
 qbc(:,:,:) = 0.0D0
@@ -55,6 +63,8 @@ end do
 end do
 
 ! Calculate Second Order Correction
+
+if (hr) then
 do i = 0, nx
 do j = 0, ny
 
@@ -63,7 +73,7 @@ call calc_correction(ay(:,i,j-1:j+1),sy(:,i,j),ry(:,:,i,j),g_c(:,i,j),dt,dx)
 
 end do
 end do
-
+end if
 ! Fix the Corner Fluxes
 do i = 0, nx
 do j = 0, ny
@@ -102,11 +112,11 @@ q = q - (dt/dx) * ( fp(:,0:nx-1,1:ny) + fm(:,1:nx,1:ny))&
 
 end subroutine advance_sw
 
-subroutine advance_coriolis(q,f,nx,ny,dt)
+subroutine advance_coriolis(q,nx,ny,f,dt)
 implicit none
 integer nx,ny
 real(8), dimension(3,nx,ny) :: q,qm
-real(8) g,dt,f(nx,ny)
+real(8) g,dt,f
 intent(in) f
 intent(inout) q
 
