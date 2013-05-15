@@ -1,15 +1,17 @@
-subroutine advance_sw(q,nx,ny,g,dt,dx,dy,efix,hr)
+subroutine advance_sw(q,nx,ny,dt,dx,dy,g,efix,hr)
 use rp_sw2d_roe
+use bc
 implicit none
 
 integer nx,ny,ng,i,j
 logical, intent(in),optional  :: efix,hr
+real(8), intent(in),optional :: g
 parameter( ng = 2)
 real(8), dimension(3,-1:nx+2,-1:ny+2) :: qbc
 real(8), dimension(3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: ax,ay,sx,sy
 real(8), dimension(3,3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: rx,ry
 real(8), dimension(3,nx,ny) :: q
-real(8) g,dx,dy,dt
+real(8) dx,dy,dt
 
 !Temporary variables
 real(8) tp(3),tm(3),ta(3),ts(3),tr(3,3)
@@ -17,27 +19,9 @@ real(8) tp(3),tm(3),ta(3),ts(3),tr(3,3)
 
 real(8),dimension(3,-1:nx+1,-1:ny+1) ::  fm,fp,f_c,gm,gp,g_c
 intent(inout) q
-!intent(in), optional :: efix,hr
-
-!if (.not. present(efix)) then
-!    efix = .false.
-!end if
-!
-!if (.not. present(hr)) then
-!    hr = .false.
-!end if
 
 ! Periodic BC
-qbc(:,:,:) = 0.0D0
-qbc(1,:,:) = 1.0d0
-
-qbc(:,1:nx,1:ny) = q
-qbc(:,-ng+1:0,1:ny) = q(:,nx-ng+1:nx,:)
-qbc(:,nx+1:nx+ng,1:ny) = q(:,1:ng,:)
-
-qbc(:,1:nx,1:ny) = q
-qbc(:,1:nx,-ng+1:0) = q(:,:,ny-ng+1:ny)
-qbc(:,1:nx,ny+1:ny+ng) = q(:,:,1:ng)
+qbc = periodic_2d(q,3,nx,ny,ng)
 
 
 f_c = 0.0d0
