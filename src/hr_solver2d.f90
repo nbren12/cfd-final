@@ -103,12 +103,13 @@ q = q - (dt/dx) * ( fp(:,0:nx-1,1:ny) + fm(:,1:nx,1:ny))&
 
 end subroutine advance_sw
 
-subroutine advance_coriolis(q,nx,ny,f,dt)
+subroutine advance_coriolis(q,nx,ny,dt,f)
 implicit none
 integer nx,ny
+real(8) ,intent(in),optional:: f
+!f2py real(8), optional :: f = .1
 real(8), dimension(3,nx,ny) :: q,qm
-real(8) g,dt,f
-intent(in) f
+real(8) dt
 intent(inout) q
 
 qm = q(:,:,:)

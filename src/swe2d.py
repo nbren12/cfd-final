@@ -15,7 +15,7 @@ from ipdb import set_trace as st
 from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
-from hr_solver2d import advance_sw
+from hr_solver2d import advance_sw,advance_coriolis
 import os
 
 def periodic_bc2d(q,ng):
@@ -28,7 +28,7 @@ def periodic_bc2d(q,ng):
 class Controller(object):
     """A Class to solve conservation laws"""
 
-    def __init__(self,state,csolver,ssolver=None,num_ghost=2):
+    def __init__(self,state,csolver,srcsolver=None):
         """@todo: to be defined
 
         :state: @todo
@@ -37,10 +37,13 @@ class Controller(object):
         self.state = state
         self.csolver = csolver
 
-        if not None:
-            self.ssolver = ssolver
+        if srcsolver is not None:
+            self.ssolver = srcsolver[0]
+            self.s_opts = srcsolver[1]
+        else:
+            self.ssolver = None
+            self.s_opts = None
 
-        self.num_ghost = num_ghost
 
     def advance(self):
         """@todo: Docstring for advance
@@ -49,7 +52,10 @@ class Controller(object):
         """
         dx,dy= state.grid.delta
         dt = min(dx/10,dy/10)
-        advance_sw(self.state.q,dt,dx,dy,**state.problem_data)#   ,**self.state.problem_data)
+        self.csolver(self.state.q,dt,dx,dy,**state.problem_data)
+
+        if self.ssolver is not None:
+            self.ssolver(self.state.q,dt,**self.s_opts)
 
 
 
@@ -69,6 +75,7 @@ y = pyclaw.Dimension('y',-5.0,5.0,ny)
 domain = pyclaw.Domain((x,y))
 state  = pyclaw.State(domain,3)
 state.problem_data ={  'g':.1 , 'efix':True,'hr':True,'bcs':0}
+s_opts = {'f':0.1}
 
 dx,dy = state.grid.delta
 dt = dx / 10
@@ -95,6 +102,8 @@ xe,ye = state.grid.c_edges
 state.q[0,:,:] = h0
 state.q[1,:,:] = (u0*h0)
 state.q[2,:,:] = (v0*h0)
+
+# cont = Controller(state,advance_sw,srcsolver=(advance_coriolis,s_opts))
 cont = Controller(state,advance_sw)
 
 for i in xrange(nt):
