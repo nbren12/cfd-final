@@ -2,7 +2,7 @@ F2PY = f2py
 FF = gfortran
 FFLAGS = -shared -fPIC -O3
 
-SRC = weno.f90 rp_sw1d_roe.f90 rp_sw2d_roe.f90
+SRC = weno.f90 rp_sw1d_roe.f90 rp_sw2d_roe.f90 bc2d.f90
 OBJ = $(SRC:.f90=.so)
 FOBJ = $(SRC:.f90=_f2py.so)
 
