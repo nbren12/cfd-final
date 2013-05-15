@@ -17,8 +17,6 @@ from clawpack import pyclaw
 from matplotlib import pyplot as plt
 from hr_solver2d import advance_sw
 import os
-from SaveVideo import *
-from PIL import Image
 
 def periodic_bc2d(q,ng):
     nc,nx,ny = q.shape
@@ -70,7 +68,7 @@ y = pyclaw.Dimension('y',-5.0,5.0,ny)
 
 domain = pyclaw.Domain((x,y))
 state  = pyclaw.State(domain,3)
-state.problem_data ={  'g':.1 , 'efix':True,'hr':True}
+state.problem_data ={  'g':.1 , 'efix':True,'hr':True,'bcs':0}
 
 dx,dy = state.grid.delta
 dt = dx / 10
