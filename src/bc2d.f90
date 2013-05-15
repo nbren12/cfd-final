@@ -1,6 +1,6 @@
 !  1-left, 2-right, 3-up, 4-down
 ! lr = 0 (left) lr =1 (right) lr = 2 (both)
-module bc 
+module bc2d
 integer, parameter :: PERIODIC = 0
 integer, parameter :: OUTFLOW = 1
 contains
@@ -92,9 +92,4 @@ function outflow_2d(q,nc,nx,ny,ng) result(qbc)
 
 end function 
 
-end module bc 
-
-
-
-    
-    
+end module bc2d
