@@ -1,6 +1,6 @@
 subroutine advance_sw(q,nx,ny,dt,dx,dy,g,efix,hr,bcs)
 use rp_sw2d_roe
-use bc
+use bc2d
 implicit none
 
 integer nx,ny,ng,i,j
