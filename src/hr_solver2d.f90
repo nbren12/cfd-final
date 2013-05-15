@@ -6,6 +6,8 @@ implicit none
 integer nx,ny,ng,i,j
 logical, intent(in),optional  :: efix,hr
 real(8), intent(in),optional :: g
+!f2py real(8),optional :: g=9.812
+!f2py logical,optional :: efix=1,hr=1
 parameter( ng = 2)
 real(8), dimension(3,-1:nx+2,-1:ny+2) :: qbc
 real(8), dimension(3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: ax,ay,sx,sy
@@ -22,7 +24,6 @@ intent(inout) q
 
 ! Periodic BC
 qbc = periodic_2d(q,3,nx,ny,ng)
-
 
 f_c = 0.0d0
 g_c = 0.0d0
