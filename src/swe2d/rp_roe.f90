@@ -9,14 +9,14 @@ fp = matmul(r,a*max(s(:),0.0D0))
 fm =matmul(r,a*min(s(:),0.0D0))
 end subroutine calc_pm
 
-subroutine calc_correction(a,s,r,f_c,dt,dx)
+subroutine calc_correction(a,s,r,nc,f_c,dt,dx)
 implicit none
-real(8) a(3,-1:1),s(3),r(3,3)
-real(8) theta(3), a_c(3),dt,dx
-integer j
-real(8), dimension(3), intent(inout) :: f_c
+real(8) a(nc,-1:1),s(nc),r(nc,nc)
+real(8) theta(nc), a_c(nc),dt,dx
+integer j,nc
+real(8), dimension(nc), intent(inout) :: f_c
 
-do j=1,3
+do j=1,nc
 if (a(j,0) .ne. 0.0D0) then
     if (S(j) .gt. 0) then
         theta(j) = a(j,-1)/a(j,0)

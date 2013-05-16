@@ -59,8 +59,8 @@ if (hr) then
 do i = 0, nx
 do j = 0, ny
 
-call calc_correction(ax(:,i-1:i+1,j),sx(:,i,j),rx(:,:,i,j),f_c(:,i,j),dt,dx)
-call calc_correction(ay(:,i,j-1:j+1),sy(:,i,j),ry(:,:,i,j),g_c(:,i,j),dt,dx)
+call calc_correction(ax(:,i-1:i+1,j),sx(:,i,j),rx(:,:,i,j),3,f_c(:,i,j),dt,dx)
+call calc_correction(ay(:,i,j-1:j+1),sy(:,i,j),ry(:,:,i,j),3,g_c(:,i,j),dt,dx)
 
 end do
 end do
