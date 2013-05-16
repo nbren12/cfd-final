@@ -1,2 +1,2 @@
-from .solver2d import *
+from .solver import *
 from .swe2d import Controller

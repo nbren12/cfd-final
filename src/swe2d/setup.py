@@ -9,7 +9,7 @@ def configuration(parent_package='',top_path=None):
 
 
     config.add_extension('solver',
-                    ['./hr_solver1d.f90','./hr_solver2d.f90','./rp_roe.f90','./bc2d.f90'],
+                    ['./hr_solver2d.f90','./rp_roe.f90','./bc2d.f90'],
                     )
 
 
