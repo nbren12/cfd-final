@@ -1,4 +1,4 @@
-module rp_sw2d_roe
+module rp_roe
 public phi
 contains
 
@@ -202,4 +202,4 @@ tmp = max(min(1.0D0,2*theta),min(2.0D0,theta))
 y = max(0.0D0, tmp)
 end function PHI
 
-end module rp_sw2d_roe
+end module rp_roe

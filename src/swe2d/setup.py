@@ -8,8 +8,8 @@ def configuration(parent_package='',top_path=None):
     config = Configuration('swe2d',parent_package,top_path)
 
 
-    config.add_extension('solver2d',
-                    ['./hr_solver2d.f90','./rp_sw2d_roe.f90','./bc2d.f90'],
+    config.add_extension('solver',
+                    ['./hr_solver1d.f90','./hr_solver2d.f90','./rp_roe.f90','./bc2d.f90'],
                     )
 
 

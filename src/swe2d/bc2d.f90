@@ -5,34 +5,36 @@ integer, parameter :: PERIODIC = 0
 integer, parameter :: OUTFLOW = 1
 contains
 
-subroutine periodic_1d(q,n,ng,qbc)
-    double precision, intent(in) :: q(n)
-    double precision, intent(out) :: qbc(-ng+1:n+ng)
-    integer n,ng
+function periodic_1d(q,nc,n,ng) result (qbc)
+    double precision, intent(in) :: q(nc,n)
+    double precision  :: qbc(nc,-ng+1:n+ng)
+    integer n,ng,nc
 
-    qbc(1:n) = q
-    qbc(-ng+1:0) = q(n-ng+1:n)
-    qbc(n+1:n+ng) = q(1:ng)
+    qbc(:,1:n) = q
+    qbc(:,-ng+1:0) = q(:,n-ng+1:n)
+    qbc(:,n+1:n+ng) = q(:,1:ng)
 
-end subroutine periodic_1d
+end function periodic_1d
 
-subroutine outflow_1d(q,n,ng,lr,qbc)
-    double precision, intent(in) :: q(n)
-    double precision, intent(out) :: qbc(-ng+1:n+ng)
-    integer n,ng,lr
+function outflow_1d(q,nc,n,ng,lr) result(qbc)
+    double precision, intent(in) :: q(nc,n)
+    double precision :: qbc(nc,-ng+1:n+ng)
+    integer n,ng,lr,nc,c
    
-    qbc(1:n) = q
+    qbc(:,1:n) = q
 
+    do c = 1,nc
     if (lr .eq. 0) then
-        qbc(-ng+1:0) = q(1)
+        qbc(c,-ng+1:0) = q(c,1)
     else if (lr .eq. 1) then
-        qbc(n+1:n+ng) = q(n)
+        qbc(c,n+1:n+ng) = q(c,n)
     else if  (lr .eq. 2) then
-        qbc(-ng+1:0) = q(1)
-        qbc(n+1:n+ng) = q(n)
+        qbc(c,-ng+1:0) = q(c,1)
+        qbc(c,n+1:n+ng) = q(c,n)
     end if
+    end do
 
-end subroutine outflow_1d
+end function outflow_1d
 
 subroutine neumann_1d(q,n,ng,lr,qbc)
     double precision, intent(in) :: q(n)

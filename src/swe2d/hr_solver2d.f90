@@ -1,5 +1,5 @@
 subroutine advance_sw(q,nx,ny,dt,dx,dy,g,efix,hr,bcs)
-use rp_sw2d_roe
+use rp_roe
 use bc2d
 implicit none
 
@@ -97,9 +97,9 @@ end do
 end do
 
 q = q - (dt/dx) * ( fp(:,0:nx-1,1:ny) + fm(:,1:nx,1:ny))&
-    -(dt/dx) * ( gp(:,1:nx,0:ny-1) + gm(:,1:nx,1:ny) )&
+    -(dt/dy) * ( gp(:,1:nx,0:ny-1) + gm(:,1:nx,1:ny) )&
     -(dt/dx) * ( f_c(:,1:nx,1:ny) - f_c(:,0:nx-1,1:ny))&
-    -(dt/dx) * ( g_c(:,1:nx,1:ny) - g_c(:,1:nx,0:ny-1))
+    -(dt/dy) * ( g_c(:,1:nx,1:ny) - g_c(:,1:nx,0:ny-1))
 
 end subroutine advance_sw
 

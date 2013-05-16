@@ -20,8 +20,8 @@ from matplotlib import pyplot as plt
 
 g = 9.812
 H = 1
-nx = 250
-ny = 250
+nx = 100
+ny = 100
 
 
 #   First Dimension is x, Second Dimension is y
@@ -35,13 +35,14 @@ s_opts = {'f':0.1}
 
 dx,dy = state.grid.delta
 dt = dx / 10
-T  = 1.0
+T  = .1
 nt = int(T/dt)
 
 
 # Initial Data for 2d Radial Dam Break
 h0 = np.ones((nx,ny)) #
 h0 += 2*(reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers))< 4)
+# h0 += np.exp(-reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers)))
 u0 = np.zeros(domain.grid.num_cells)
 v0 = np.zeros(domain.grid.num_cells)
 
@@ -53,6 +54,13 @@ state.q[2,:,:] = (v0*h0)
 cont = Controller(state,advance_sw)
 cont.run(T)
 
-plt.contourf(cont.get_plot_args())
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+ax = fig.add_subplot(111,projection='3d')
+ax.plot_surface(*cont.get_plot_args(),
+        rstride=1, cstride=1,
+        color='green',linewidth=.1,shade=True)
+
+# plt.contourf(*cont.get_plot_args())
 plt.show()
 

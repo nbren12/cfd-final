@@ -1,4 +1,4 @@
-subroutine advance_1d(q,nx,g,dt,dx,qbc)
+subroutine advance_1d(q,nx,dt,dx,g,qbc)
 use rp_sw1d_roe
 implicit none
 integer nx,ng,i,idx,j
