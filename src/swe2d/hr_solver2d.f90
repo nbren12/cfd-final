@@ -29,6 +29,8 @@ if ( bcs .eq. PERIODIC ) then
     qbc = periodic_2d(q,3,nx,ny,ng)
 elseif (bcs .eq. OUTFLOW) then
     qbc = outflow_2d(q,3,nx,ny,ng)
+elseif (bcs .eq. OUT_PER) then
+    qbc = outflow_per(q,3,nx,ny,ng)
 end if
 
 f_c = 0.0d0
