@@ -1,14 +1,14 @@
-subroutine advance_sw(q,nx,ny,dt,dx,dy,g,efix,hr,bcs)
+subroutine advance_sw(q,nx,ny,dt,dx,dy,g,efix,hr,cfix,bcs)
 use rp_roe
 use bc2d
 implicit none
 
 integer nx,ny,ng,i,j
-logical, intent(in),optional  :: efix,hr
+logical, intent(in),optional  :: efix,hr,cfix
 integer,intent(in),optional :: bcs
 real(8), intent(in),optional :: g
 !f2py real(8),optional :: g=9.812
-!f2py logical,optional :: efix=1,hr=1
+!f2py logical,optional :: efix=1,hr=1,cfix=1
 !f2py integer,optional :: bcs = 0
 parameter( ng = 2)
 real(8), dimension(3,-1:nx+2,-1:ny+2) :: qbc
@@ -68,6 +68,7 @@ end do
 end do
 end if
 ! Fix the Corner Fluxes
+if (cfix) then
 do i = 0, nx
 do j = 0, ny
 
@@ -97,6 +98,8 @@ f_c(:,i-1,j) = f_c(:,i-1,j) - (dt/2.0d0/dx) * tm
 
 end do
 end do
+
+end if
 
 q = q - (dt/dx) * ( fp(:,0:nx-1,1:ny) + fm(:,1:nx,1:ny))&
     -(dt/dy) * ( gp(:,1:nx,0:ny-1) + gm(:,1:nx,1:ny) )&
