@@ -13,7 +13,7 @@ Here, I used periodic boundary conditions. Might want to generalize the code lat
 import numpy as np
 from clawpack import pyclaw
 import os
-
+import itertools
 class Controller(object):
     """A Class to solve conservation laws"""
 
@@ -71,8 +71,8 @@ class Controller(object):
             q = self.state.q[c,:]
 
         centers = self.state.grid.c_centers
-
-        return (centers,q)
+        centers.append(q)
+        return centers
 
 class SavedState(object):
     def __init__(self,name='swe',time=0.0):
