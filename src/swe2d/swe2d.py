@@ -64,7 +64,6 @@ class Controller(object):
             self.counter = i+1
 
     def get_plot_args(self,c=0):
-
         if self.state.grid.num_dim == 2:
             q = self.state.q[c,:,:]
         else:
@@ -73,6 +72,9 @@ class Controller(object):
         centers = self.state.grid.c_centers
         centers.append(q)
         return centers
+    def get_plot_args_1d(self,i,c=0):
+        x,y,z=  self.get_plot_args(c=c)
+        pass
 
 class SavedState(object):
     def __init__(self,name='swe',time=0.0):
