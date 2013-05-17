@@ -17,6 +17,19 @@ from swe2d import Controller, advance_sw
 from matplotlib import pyplot as plt
 from scipy.interpolate import RectBivariateSpline
 
+class ControllerSW2D(Controller):
+    def surf_plot(self,ax=None):
+        nx,ny = self.state.grid.num_cells
+        rs = max(nx/100,1)
+        cs = max(ny/100,1)
+        ax.plot_surface(*self.get_plot_args(),
+            rstride=rs, cstride=cs,
+            color='white',linewidth=.4,shade=True,alpha=1.0)
+    def cont_plot(self,ax=None):
+        xx,yy,h = self.get_plot_args()
+        ax.contour(xx,yy,h,20)
+
+
 R = 3
 T  = .5
 g = 9.812           # Gravity
@@ -25,8 +38,8 @@ eta = 1             # Height Deviation
 c = np.sqrt(H*g)    # Speed of Gravity waves
 
 # Initialize Grid
-nx = 500
-ny = 500
+nx =200
+ny =200
 
 
 #   First Dimension is x, Second Dimension is y
@@ -41,10 +54,10 @@ s_opts = {'f':0.1}
 
 # Initial Data for 1d Dam Break
 # Initial Data for 2d Radial Dam Break
-
-h0fine = np.ones((3000,3000)) *H
-xfine = pyclaw.Dimension('x',-10.0,10.0,3000)
-yfine = pyclaw.Dimension('y',-10.0,10.0,3000)
+mult = min(10,3000.0/nx)
+h0fine = np.ones((nx*mult,ny*mult)) *H
+xfine = pyclaw.Dimension('x',-10.0,10.0,nx*mult)
+yfine = pyclaw.Dimension('y',-10.0,10.0,ny*mult)
 rfine = np.sqrt(xfine.centers[:,None]**2 + yfine.centers[None,:]**2)
 h0fine -= eta*np.sign(rfine - R)
 inter = RectBivariateSpline(xfine.centers,yfine.centers,h0fine)
@@ -78,30 +91,24 @@ state.q[1,:,:] = (u0*h0)
 state.q[2,:,:] = (v0*h0)
 
 print("Beginning Time Stepping")
-cont = Controller(state,advance_sw)
+cont = ControllerSW2D(state,advance_sw,prefix='./tmp_run')
 cont.run(T)
 
 from mpl_toolkits.mplot3d import Axes3D
-rs = max(nx/100,1)
-cs = max(ny/100,1)
-xx,yy= state.grid.c_centers
+h = cont.state.q[0,:,:]
+
+cont.read_frame(0)
 fig = plt.figure(figsize=(12,4))
 ax = fig.add_subplot(121,projection='3d')
-ax.plot_surface(*cont.get_plot_args(),
-    rstride=rs, cstride=cs,
-    color='white',linewidth=.4,shade=True,alpha=1.0)
+cont.surf_plot(ax=ax)
 
+cont.read_frame(5)
 ax = fig.add_subplot(122,projection='3d')
-ax.plot_surface(xx,yy,h0,
-    rstride=rs, cstride=cs,
-    color='white',linewidth=.4,shade=True,alpha=1.0)
+cont.surf_plot(ax)
+
 
 fig1 = plt.figure()
 ax = fig1.add_subplot(111)
-ax.contour(*cont.get_plot_args())
-# xx,yy,z = cont.get_plot_args()
-# fig1 = plt.figure()
-# plt.plot(xx[:,ny/2],z[:,ny/2])
-# # plt.contourf(*cont.get_plot_args())
+cont.cont_plot(ax=ax)
 plt.show()
 

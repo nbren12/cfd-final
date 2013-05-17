@@ -14,10 +14,20 @@ import numpy as np
 from clawpack import pyclaw
 import os
 import itertools
+import cPickle as pickle
+import shutil
+
+def saveobject(obj, filename):
+    with open(filename, 'wb') as output:
+        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
+
+def load_controller(folder):
+    return pickle.load(folder)
+
 class Controller(object):
     """A Class to solve conservation laws"""
 
-    def __init__(self,state,csolver,srcsolver=None,dt=None):
+    def __init__(self,state,csolver,srcsolver=None,dt=None,prefix='tmp_run'):
         """@todo: to be defined
 
         :state: @todo
@@ -37,8 +47,33 @@ class Controller(object):
             self.dt =dt
         else:
             self.dt = min(state.grid.delta)/10
+        self.prefix = prefix
+        self.folder = os.path.abspath(self.prefix)
 
+    def save_controller(self):
+        assert not os.path.exists(self.folder)
+        import __main__
+        os.mkdir(self.folder)
+        shutil.copy2(os.path.realpath(__main__.__file__),self.folder)
 
+        # saveobject(self,self.folder+"/controller.pickle")
+
+    def save_frame(self, frame,time):
+        """@todo: Docstring for save_frame
+
+        :frame: @todo
+        :time: @todo
+        :returns: @todo
+
+        """
+        np.savez(self.folder+"/%.5d"%frame,t=time,q=self.state.q)
+
+    def read_frame(self,frame):
+        fpath = self.folder+"/%.5d.npz"%frame
+        assert os.path.exists(fpath)
+        npz =np.load(fpath)
+        self.time = npz['t']
+        self.state.q = npz['q']
 
     def advance(self):
         """@todo: Docstring for advance
@@ -50,22 +85,32 @@ class Controller(object):
 
         if self.ssolver is not None:
             self.ssolver(self.state.q,self.dt,*delta,**self.s_opts)
+
     def get_state(self):
         return self.state
 
-    def run(self, T):
+    def run(self, T,save=True):
         """
         run model until time T
 
         :T: is the end time
         """
+
         nt = int(T/self.dt)
+
+        if save:
+            self.save_controller()
+            self.save_frame(0,0)
+            self.frame=0
+            dframe = int(.05/self.dt)
 
         for i in xrange(nt):
             print "Step %d of %d"%(i+1,nt)
             self.advance()
             self.time = ( i +1)*self.dt
-            self.counter = i+1
+            if save and (i+1)%dframe == 0:
+                self.frame +=1
+                self.save_frame(self.frame,self.time)
 
     def get_plot_args(self,c=0):
         if self.state.grid.num_dim == 2:
@@ -78,24 +123,6 @@ class Controller(object):
         return centers
     def get_plot_args_1d(self,i,c=0):
         x,y,z=  self.get_plot_args(c=c)
-        pass
-
-class SavedState(object):
-    def __init__(self,name='swe',time=0.0):
-        self.time = time
-        self.name = name
-        self.frame = -1
-
-    def update_state(self, time,state):
-        self.time  = time
-        self.state = state
-        self.frame +=1
-
-    def init_dir(self):
-        os.mkdir(self.name)
-
-
-    def write_state(self):
         pass
 
 
