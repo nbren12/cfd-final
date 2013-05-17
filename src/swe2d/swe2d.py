@@ -17,7 +17,7 @@ import itertools
 class Controller(object):
     """A Class to solve conservation laws"""
 
-    def __init__(self,state,csolver,srcsolver=None):
+    def __init__(self,state,csolver,srcsolver=None,dt=None):
         """@todo: to be defined
 
         :state: @todo
@@ -33,7 +33,11 @@ class Controller(object):
             self.ssolver = None
             self.s_opts = None
 
-        self.dt = min(state.grid.delta)/10
+        if dt is not None:
+            self.dt =dt
+        else:
+            self.dt = min(state.grid.delta)/10
+
 
 
     def advance(self):
