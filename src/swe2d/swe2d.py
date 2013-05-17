@@ -45,7 +45,7 @@ class Controller(object):
         self.csolver(self.state.q,self.dt,*delta,**self.state.problem_data)
 
         if self.ssolver is not None:
-            self.ssolver(self.state.q,dt,**self.s_opts)
+            self.ssolver(self.state.q,self.dt,*delta,**self.s_opts)
     def get_state(self):
         return self.state
 
