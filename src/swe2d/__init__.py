@@ -1,3 +1,3 @@
-from .solver import *
+from .f90_solvers import *
 from .swe2d import Controller
-from .solvers import *
+from .py_solvers import *

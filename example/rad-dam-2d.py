@@ -23,8 +23,8 @@ eta = 1             # Height Deviation
 c = np.sqrt(H*g)    # Speed of Gravity waves
 
 # Initialize Grid
-nx = 300
-ny = 300
+nx = 1000
+ny = 1000
 
 
 #   First Dimension is x, Second Dimension is y

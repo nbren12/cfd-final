@@ -20,7 +20,7 @@ from matplotlib import pyplot as plt
 
 g = 9.812
 H = 1
-nx = 100
+nx = 200
 ny = 2
 
 
@@ -30,16 +30,16 @@ y = pyclaw.Dimension('y',-10.0,10.0,ny)
 
 domain = pyclaw.Domain((x,y))
 state  = pyclaw.State(domain,3)
-state.problem_data ={  'g':g , 'efix':True,'hr':True,'bcs':2}
+state.problem_data ={  'g':g , 'efix':True,'hr':True,'bcs':2,'cfix':0}
 s_opts = {'f':0.1}
 
 dx,dy = state.grid.delta
 dt = dx / 10
-T  = 0.1
+T  = 1
 nt = int(T/dt)
 
 
-# Initial Data for 2d Radial Dam Break
+# Initial Data for 1d Dam Break
 h0 = np.ones((nx,ny)) #
 h0 = (2-np.sign(x.centers))[:,None]
 u0 = np.zeros(domain.grid.num_cells)
@@ -51,10 +51,11 @@ state.q[1,:,:] = (u0*h0)
 state.q[2,:,:] = (v0*h0)
 
 cont = Controller(state,advance_sw)
+
 cont.run(T)
 
 xx,yy,z = cont.get_plot_args()
-plt.plot(xx,z)
+plt.plot(xx[:,0],z[:,0])
 # plt.contourf(*cont.get_plot_args())
 plt.show()
 
