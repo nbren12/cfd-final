@@ -18,15 +18,15 @@ from matplotlib import pyplot as plt
 from scipy.interpolate import RectBivariateSpline
 
 R = 3
-T  = .2
+T  = .5
 g = 9.812           # Gravity
 H = 2               # Average Depth
 eta = 1             # Height Deviation
 c = np.sqrt(H*g)    # Speed of Gravity waves
 
 # Initialize Grid
-nx = 50
-ny = 50
+nx = 500
+ny = 500
 
 
 #   First Dimension is x, Second Dimension is y
@@ -42,14 +42,16 @@ s_opts = {'f':0.1}
 # Initial Data for 1d Dam Break
 # Initial Data for 2d Radial Dam Break
 
-h0fine = np.ones((1000,1000)) *H
-xfine = pyclaw.Dimension('x',-10.0,10.0,1000)
-yfine = pyclaw.Dimension('y',-10.0,10.0,1000)
+h0fine = np.ones((3000,3000)) *H
+xfine = pyclaw.Dimension('x',-10.0,10.0,3000)
+yfine = pyclaw.Dimension('y',-10.0,10.0,3000)
 rfine = np.sqrt(xfine.centers[:,None]**2 + yfine.centers[None,:]**2)
 h0fine -= eta*np.sign(rfine - R)
-
 inter = RectBivariateSpline(xfine.centers,yfine.centers,h0fine)
+del h0fine,xfine,yfine
 
+
+print("Constructing Initial Condition")
 # Averaging the interpolant onto the coarse cells
 h0 = np.zeros(state.grid.num_cells)
 for i in xrange(x.num_cells):
@@ -63,7 +65,7 @@ h0[r > 4] = H-eta
 u0 = np.zeros(domain.grid.num_cells)
 v0 = np.zeros(domain.grid.num_cells)
 
-del xfine,yfine,h0fine,inter
+del inter
 
 # Figure out the time step
 dx,dy = state.grid.delta
@@ -75,6 +77,7 @@ state.q[0,:,:] = h0.copy()
 state.q[1,:,:] = (u0*h0)
 state.q[2,:,:] = (v0*h0)
 
+print("Beginning Time Stepping")
 cont = Controller(state,advance_sw)
 cont.run(T)
 
@@ -93,7 +96,9 @@ ax.plot_surface(xx,yy,h0,
     rstride=rs, cstride=cs,
     color='white',linewidth=.4,shade=True,alpha=1.0)
 
-
+fig1 = plt.figure()
+ax = fig1.add_subplot(111)
+ax.contour(*cont.get_plot_args())
 # xx,yy,z = cont.get_plot_args()
 # fig1 = plt.figure()
 # plt.plot(xx[:,ny/2],z[:,ny/2])
