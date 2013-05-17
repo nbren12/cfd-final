@@ -4,6 +4,7 @@ module bc2d
 integer, parameter :: PERIODIC = 0
 integer, parameter :: OUTFLOW = 1
 integer, parameter :: OUT_PER = 2
+integer, parameter :: NEU_OUT = 3
 contains
 
 function periodic_1d(q,nc,n,ng) result (qbc)
@@ -116,6 +117,26 @@ function outflow_per(q,nc,nx,ny,ng) result(qbc)
     !qbc(:,:,ny+i) = qbc(:,:,i)
     !qbc(:,:,1-i) = qbc(:,:,ny+1-i)
     !end do
+
+end function 
+
+function neumann_out(q,nc,nx,ny,ng) result(qbc)
+    double precision :: q(nc,nx,ny)
+    double precision :: qbc(nc,-ng+1:nx+ng,-ng +1 :ny+ng)
+    integer nc,nx,ny,ng
+    integer i,j,c
+
+    qbc(:,1:nx,1:ny) = q
+
+    qbc(:,1:nx,1:ny) = q
+    qbc(:,1:nx,-ng+1:0) = q(:,:,ny-ng+1:ny)
+    qbc(:,1:nx,ny+1:ny+ng) = q(:,:,1:ng)
+
+    do i = 1, ng
+    qbc(:,1-i,:)   = qbc(:,i,:)
+    qbc(:,nx+i,:)   = qbc(:,nx,:)
+    end do
+
 
 end function 
 

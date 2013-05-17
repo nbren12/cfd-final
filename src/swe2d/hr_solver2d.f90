@@ -24,13 +24,15 @@ real(8) tp(3),tm(3),ta(3),ts(3),tr(3,3)
 real(8),dimension(3,-1:nx+1,-1:ny+1) ::  fm,fp,f_c,gm,gp,g_c
 intent(inout) q
 
-! Periodic BC
+! Boundary Conditions
 if ( bcs .eq. PERIODIC ) then
     qbc = periodic_2d(q,3,nx,ny,ng)
 elseif (bcs .eq. OUTFLOW) then
     qbc = outflow_2d(q,3,nx,ny,ng)
 elseif (bcs .eq. OUT_PER) then
     qbc = outflow_per(q,3,nx,ny,ng)
+elseif (bcs .eq. NEU_OUT) then
+    qbc = neumann_out(q,3,nx,ny,ng)
 end if
 
 f_c = 0.0d0
