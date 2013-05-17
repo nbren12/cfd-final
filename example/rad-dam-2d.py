@@ -16,35 +16,38 @@ import os
 from swe2d import Controller, advance_sw
 from matplotlib import pyplot as plt
 
+T  = .2
+g = 9.812           # Gravity
+H = 2               # Average Depth
+eta = 1             # Height Deviation
+c = np.sqrt(H*g)    # Speed of Gravity waves
 
-
-g = 9.812
-H = 1
-nx = 100
-ny = 100
+# Initialize Grid
+nx = 300
+ny = 300
 
 
 #   First Dimension is x, Second Dimension is y
 x = pyclaw.Dimension('x',-10.0,10.0,nx)
 y = pyclaw.Dimension('y',-10.0,10.0,ny)
-
 domain = pyclaw.Domain((x,y))
+
+# Initialized state and Problem Parameters
 state  = pyclaw.State(domain,3)
 state.problem_data ={  'g':g , 'efix':True,'hr':True,'bcs':0}
 s_opts = {'f':0.1}
 
-dx,dy = state.grid.delta
-dt = dx / 10
-T  = .1
-nt = int(T/dt)
-
-
+# Initial Data for 1d Dam Break
 # Initial Data for 2d Radial Dam Break
-h0 = np.ones((nx,ny)) #
-h0 += 2*(reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers))< 4)
-# h0 += np.exp(-reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers)))
+h0 = np.ones((nx,ny)) *H#
+h0 -= eta*np.sign((reduce(lambda x,y:np.sqrt(x+y),map(lambda x: x**2,domain.grid.c_centers))-4))
 u0 = np.zeros(domain.grid.num_cells)
 v0 = np.zeros(domain.grid.num_cells)
+
+# Figure out the time step
+dx,dy = state.grid.delta
+dt = min(dx,dy)/c/1.5
+nt = int(T/dt)
 
 
 state.q[0,:,:] = h0
@@ -54,13 +57,17 @@ state.q[2,:,:] = (v0*h0)
 cont = Controller(state,advance_sw)
 cont.run(T)
 
-from mpl_toolkits.mplot3d import Axes3D
-fig = plt.figure()
-ax = fig.add_subplot(111,projection='3d')
-ax.plot_surface(*cont.get_plot_args(),
-        rstride=1, cstride=1,
-        color='green',linewidth=.1,shade=True)
+# from mpl_toolkits.mplot3d import Axes3D
+# fig = plt.figure()
+# ax = fig.add_subplot(111,projection='3d')
+# ax.plot_surface(*cont.get_plot_args(),
+#         rstride=1, cstride=1,
+#         color='green',linewidth=.1,shade=True)
+#
 
+xx,yy,z = cont.get_plot_args()
+fig1 = plt.figure()
+plt.plot(xx[:,ny/2],z[:,ny/2])
 # plt.contourf(*cont.get_plot_args())
 plt.show()
 
