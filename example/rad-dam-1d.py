@@ -16,7 +16,7 @@ import os
 from swe2d import Controller, advance_sw,advance_metric_terms
 from matplotlib import pyplot as plt
 
-
+R = 3
 T  = .2
 g = 9.812           # Gravity
 H = 2               # Average Depth
@@ -38,7 +38,7 @@ s_opts = {'r':state.grid.c_centers[0]}
 
 # Initial Data for 1d Dam Break
 h0 = np.ones((nx,ny))*H#
-h0 -=np.sign(x.centers-2)[:,None]*eta
+h0 -=np.sign(x.centers-R)[:,None]*eta
 u0 = np.zeros(domain.grid.num_cells)
 v0 = np.zeros(domain.grid.num_cells)
 
