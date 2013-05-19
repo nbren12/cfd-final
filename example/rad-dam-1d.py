@@ -27,7 +27,7 @@ c = np.sqrt(H*g)    # Speed of Gravity waves
 nx = 4000
 ny = 2
 
-x = pyclaw.Dimension('x',0.0,10.0,nx)
+x = pyclaw.Dimension('x',0.0,15.0,nx)
 y = pyclaw.Dimension('y',0.0,10.0,ny)
 domain = pyclaw.Domain((x,y))
 
