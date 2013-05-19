@@ -16,6 +16,7 @@ import os
 import itertools
 import cPickle as pickle
 import shutil
+from .template import fill_template
 
 def saveobject(obj, filename):
     with open(filename, 'wb') as output:
@@ -51,13 +52,25 @@ class Controller(object):
         self.folder = os.path.abspath(self.prefix)
 
     def save_controller(self):
-        assert not os.path.exists(self.folder)
         import __main__
-        os.mkdir(self.folder)
+        exists = os.path.exists(self.folder)
+        if not exists: os.mkdir(self.folder)
+        s = fill_template(
+                nx=self.state.grid.delta[0],
+                ny=self.state.grid.delta[1],
+                dt=self.dt,
+                **self.state.problem_data
+                )
+        with open(self.folder+"/loader.py",'w') as f:
+            f.write(s)
+
+        with open(self.folder+"/__init__.py",'a') as f:
+            f.write('from .loader import cont')
+        assert not exists
         shutil.copy2(os.path.realpath(__main__.__file__),self.folder)
 
-        # saveobject(self,self.folder+"/controller.pickle")
 
+        # saveobject(self,self.folder+"/controller.pickle")
     def save_frame(self, frame,time):
         """@todo: Docstring for save_frame
 
