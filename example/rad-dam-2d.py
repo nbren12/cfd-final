@@ -13,33 +13,24 @@ Here, I used periodic boundary conditions. Might want to generalize the code lat
 import numpy as np
 from clawpack import pyclaw
 import os
-from swe2d import Controller, advance_sw
+from swe2d import Controller, ControllerSW2D,advance_sw
 from matplotlib import pyplot as plt
 from scipy.interpolate import RectBivariateSpline
 
-class ControllerSW2D(Controller):
-    def surf_plot(self,ax=None):
-        nx,ny = self.state.grid.num_cells
-        rs = max(nx/100,1)
-        cs = max(ny/100,1)
-        ax.plot_surface(*self.get_plot_args(),
-            rstride=rs, cstride=cs,
-            color='white',linewidth=.4,shade=True,alpha=1.0)
-    def cont_plot(self,ax=None):
-        xx,yy,h = self.get_plot_args()
-        ax.contour(xx,yy,h,20)
-
+suffix = "test"
 
 R = 3
-T  = .5
+T  = 1.0
 g = 9.812           # Gravity
 H = 2               # Average Depth
 eta = 1             # Height Deviation
 c = np.sqrt(H*g)    # Speed of Gravity waves
 
 # Initialize Grid
-nx =200
-ny =200
+n = 200
+nx =n
+ny =n
+folder = "n%d_%s"%( nx,suffix )
 
 
 #   First Dimension is x, Second Dimension is y
@@ -49,7 +40,7 @@ domain = pyclaw.Domain((x,y))
 
 # Initialized state and Problem Parameters
 state  = pyclaw.State(domain,3)
-state.problem_data ={  'g':g , 'efix':True,'hr':True,'bcs':0,'cfix':1}
+state.problem_data ={  'g':g , 'efix':True,'hr':False,'bcs':0,'cfix':1}
 s_opts = {'f':0.1}
 
 # Initial Data for 1d Dam Break
@@ -91,24 +82,24 @@ state.q[1,:,:] = (u0*h0)
 state.q[2,:,:] = (v0*h0)
 
 print("Beginning Time Stepping")
-cont = ControllerSW2D(state,advance_sw,prefix='./tmp_run')
+cont = ControllerSW2D(state,advance_sw,prefix=folder)
 cont.run(T)
 
-from mpl_toolkits.mplot3d import Axes3D
-h = cont.state.q[0,:,:]
-
-cont.read_frame(0)
-fig = plt.figure(figsize=(12,4))
-ax = fig.add_subplot(121,projection='3d')
-cont.surf_plot(ax=ax)
-
-cont.read_frame(5)
-ax = fig.add_subplot(122,projection='3d')
-cont.surf_plot(ax)
-
-
-fig1 = plt.figure()
-ax = fig1.add_subplot(111)
-cont.cont_plot(ax=ax)
-plt.show()
-
+# from mpl_toolkits.mplot3d import Axes3D
+# h = cont.state.q[0,:,:]
+#
+# cont.read_frame(0)
+# fig = plt.figure(figsize=(12,4))
+# ax = fig.add_subplot(121,projection='3d')
+# cont.surf_plot(ax=ax)
+#
+# cont.read_frame(5)
+# ax = fig.add_subplot(122,projection='3d')
+# cont.surf_plot(ax)
+#
+#
+# fig1 = plt.figure()
+# ax = fig1.add_subplot(111)
+# cont.cont_plot(ax=ax)
+# plt.show()
+#

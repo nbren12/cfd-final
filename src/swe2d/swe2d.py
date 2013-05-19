@@ -129,5 +129,17 @@ class Controller(object):
         x,y,z=  self.get_plot_args(c=c)
         pass
 
+class ControllerSW2D(Controller):
+    def surf_plot(self,ax=None):
+        nx,ny = self.state.grid.num_cells
+        rs = max(nx/100,1)
+        cs = max(ny/100,1)
+        ax.plot_surface(*self.get_plot_args(),
+            rstride=rs, cstride=cs,
+            color='white',linewidth=.4,shade=True,alpha=1.0)
+    def cont_plot(self,ax=None):
+        xx,yy,h = self.get_plot_args()
+        ax.contour(xx,yy,h,20)
+
 
 
