@@ -14,7 +14,7 @@ import numpy as np
 from clawpack import pyclaw
 import os
 from swe2d import Controller, advance_sw,advance_metric_terms
-from matplotlib import pyplot as plt
+from scipy.interpolate import interp1d
 
 R = 3
 T  = 1.0
@@ -36,27 +36,16 @@ state  = pyclaw.State(domain,3)
 state.problem_data ={  'g':g , 'efix':True,'hr':True,'bcs':3,'cfix':0}
 s_opts = {'r':state.grid.c_centers[0]}
 
-# Initial Data for 1d Dam Break
-h0 = np.ones((nx,ny))*H#
-h0 -=np.sign(x.centers-R)[:,None]*eta
-u0 = np.zeros(domain.grid.num_cells)
-v0 = np.zeros(domain.grid.num_cells)
-
 # Figure out the time step
 dx,dy = state.grid.delta
 dt = min(dx,dy)/c/1.5
 nt = int(T/dt)
 
-
-state.q[0,:,:] = h0
-state.q[1,:,:] = (u0*h0)
-state.q[2,:,:] = (v0*h0)
-
 cont = Controller(state,advance_sw,srcsolver=(advance_metric_terms,s_opts),dt=dt,prefix="hr1d_n4000")
-cont.run(T)
 
-xx,yy,z = cont.get_plot_args()
-plt.plot(xx[:,0],z[:,0])
-# plt.contourf(*cont.get_plot_args())
-plt.show()
+
+def interp_maker(frame):
+    cont.read_frame(frame)
+    inter = interp1d(x.centers,cont.state.q[:,:,0])
+    return inter
 

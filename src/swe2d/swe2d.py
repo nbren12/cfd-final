@@ -94,7 +94,10 @@ class Controller(object):
         run model until time T
 
         :T: is the end time
+        a = qb +r
         """
+        fac = int(0.1/self.dt)
+        self.dt= .1/fac
 
         nt = int(T/self.dt)
 
@@ -102,13 +105,14 @@ class Controller(object):
             self.save_controller()
             self.save_frame(0,0)
             self.frame=0
-            dframe = int(.05/self.dt)
+            dframe = fac
 
         for i in xrange(nt):
+            self.time = ( i +1)*self.dt
             print "Step %d of %d"%(i+1,nt)
             self.advance()
-            self.time = ( i +1)*self.dt
             if save and (i+1)%dframe == 0:
+                print "Saving Frame at Time = %f"%self.time
                 self.frame +=1
                 self.save_frame(self.frame,self.time)
 
