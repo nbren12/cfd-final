@@ -99,6 +99,7 @@ class Controller(object):
         if self.ssolver is not None:
             self.ssolver(self.state.q,self.dt,*delta,**self.s_opts)
 
+
     def get_state(self):
         return self.state
 
