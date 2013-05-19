@@ -82,7 +82,7 @@ state.q[1,:,:] = (u0*h0)
 state.q[2,:,:] = (v0*h0)
 
 print("Beginning Time Stepping")
-cont = ControllerSW2D(state,advance_sw,prefix=folder)
+cont = ControllerSW2D(state,advance_sw,dt=dt,prefix=folder)
 cont.run(T)
 
 # from mpl_toolkits.mplot3d import Axes3D
