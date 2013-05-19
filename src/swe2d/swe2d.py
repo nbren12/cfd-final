@@ -56,8 +56,8 @@ class Controller(object):
         exists = os.path.exists(self.folder)
         if not exists: os.mkdir(self.folder)
         s = fill_template(
-                nx=self.state.grid.delta[0],
-                ny=self.state.grid.delta[1],
+                nx=self.state.grid.num_cells[0],
+                ny=self.state.grid.num_cells[1],
                 dt=self.dt,
                 **self.state.problem_data
                 )
