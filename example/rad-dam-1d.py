@@ -52,7 +52,7 @@ state.q[0,:,:] = h0
 state.q[1,:,:] = (u0*h0)
 state.q[2,:,:] = (v0*h0)
 
-cont = Controller(state,advance_sw,srcsolver=(advance_metric_terms,s_opts),dt=dt,prefix="hr1d_n4000")
+cont = Controller(state,advance_sw,srcsolver=(advance_metric_terms,s_opts),dt=dt,prefix="hr1d_n4000_ss")
 cont.run(T)
 
 xx,yy,z = cont.get_plot_args()

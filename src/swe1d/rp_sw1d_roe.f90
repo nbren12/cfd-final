@@ -74,4 +74,16 @@ intent(in) theta
 tmp = max(min(1.0D0,2*theta),min(2.0D0,theta))
 y = max(0.0D0, tmp)
 end function PHI
+
+function minmod (theta) result(y)
+implicit none
+real(8) theta,y
+intent(in) theta
+
+if ( theta .lt. 0 ) then
+    y  = min(1.0,theta)
+else 
+    y  = max(-1.0,theta)
+end if
+end function minmod
 end module rp_sw1d_roe

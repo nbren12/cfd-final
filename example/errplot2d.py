@@ -6,12 +6,12 @@ from ipdb import set_trace as st
 from hr1d_n4000 import interp_maker
 from hr1d_n4000 import cont as hrdat
 
-datadirs = glob.glob('n*_2dhr')
+datadirs = glob.glob('n*_minmod')
 datadirs = filter(
         lambda x : os.path.isdir(x),
         datadirs)
 
-frame= 7
+frame= 3
 hrcont = interp_maker(frame)
 hrdat.read_frame(frame)
 
@@ -40,7 +40,7 @@ for dd in datadirs:
     print dd
     data = __import__(dd)
     data.cont.read_frame(frame)
-    assert(isnan(data.cont.state.q).sum()==0)
+    # assert(isnan(data.cont.state.q).sum()==0)
 
 
 

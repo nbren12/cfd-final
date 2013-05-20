@@ -1,4 +1,4 @@
-subroutine advance_sw(q,nx,ny,dt,dx,dy,g,efix,hr,cfix,bcs)
+subroutine advance_sw(q,nx,ny,dt,dx,dy,g,efix,hr,cfix,bcs,limiter)
 use rp_roe
 use bc2d
 implicit none
@@ -6,10 +6,11 @@ implicit none
 integer nx,ny,ng,i,j
 logical, intent(in),optional  :: efix,hr,cfix
 integer,intent(in),optional :: bcs
+integer,intent(in),optional :: limiter
 real(8), intent(in),optional :: g
 !f2py real(8),optional :: g=9.812
 !f2py logical,optional :: efix=1,hr=1,cfix=1
-!f2py integer,optional :: bcs = 0
+!f2py integer,optional :: bcs = 0,limiter = 1
 parameter( ng = 2)
 real(8), dimension(3,-1:nx+2,-1:ny+2) :: qbc
 real(8), dimension(3,-ng+1:nx+ng-1,-ng+1:ny+ng-1) :: ax,ay,sx,sy

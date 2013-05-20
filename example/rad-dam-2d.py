@@ -17,7 +17,7 @@ from swe2d import Controller, ControllerSW2D,advance_sw
 from matplotlib import pyplot as plt
 from scipy.interpolate import RectBivariateSpline
 
-suffix = "test"
+suffix = "minmod"
 
 R = 3
 T  = 1.0
@@ -27,7 +27,7 @@ eta = 1             # Height Deviation
 c = np.sqrt(H*g)    # Speed of Gravity waves
 
 # Initialize Grid
-n = 200
+n = 700
 nx =n
 ny =n
 folder = "n%d_%s"%( nx,suffix )
@@ -40,7 +40,7 @@ domain = pyclaw.Domain((x,y))
 
 # Initialized state and Problem Parameters
 state  = pyclaw.State(domain,3)
-state.problem_data ={  'g':g , 'efix':True,'hr':False,'bcs':0,'cfix':1}
+state.problem_data ={  'g':g , 'efix':True,'hr':True,'bcs':0,'cfix':1}
 s_opts = {'f':0.1}
 
 # Initial Data for 1d Dam Break
@@ -73,7 +73,7 @@ del inter
 
 # Figure out the time step
 dx,dy = state.grid.delta
-dt = min(dx,dy)/c/1.5
+dt = min(dx,dy)/c/3
 nt = int(T/dt)
 
 

@@ -1,5 +1,5 @@
 module rp_roe
-public phi
+public phi,minmod
 contains
 
 subroutine calc_pm(a,s,r,fm,fp)
@@ -23,7 +23,8 @@ if (a(j,0) .ne. 0.0D0) then
     else
         theta(j) = a(j,1)/a(j,0)
     end if
-    a_c(j)=PHI(theta(j)) 
+    !a_c(j)=PHI(theta(j)) 
+    a_c(j)=minmod(theta(j)) 
 else 
     a_c(j) = 0.0D0
 end if
@@ -201,5 +202,17 @@ intent(in) theta
 tmp = max(min(1.0D0,2*theta),min(2.0D0,theta))
 y = max(0.0D0, tmp)
 end function PHI
+
+function minmod (theta) result(y)
+implicit none
+real(8) theta,y
+intent(in) theta
+
+if ( theta .lt. 0 ) then
+    y  = min(1.0,theta)
+else 
+    y  = max(-1.0,theta)
+end if
+end function minmod
 
 end module rp_roe
