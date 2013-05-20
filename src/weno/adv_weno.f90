@@ -1,6 +1,5 @@
 !subroutine advance_1d(q,nx,dt,dx,L,qlout,qrout)
 subroutine advance_1d(q,nx,dt,dx,L)
-use rp_sw1d_roe
 use weno
 implicit none
 integer nx,ng,i,j

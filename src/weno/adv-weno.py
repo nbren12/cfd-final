@@ -14,7 +14,6 @@ from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
 from adv_weno import advance_1d
-from weno_f2py import weno
 from pylab import *
 
 nx = 100
@@ -23,7 +22,6 @@ x = pyclaw.Dimension('x',-1/2.0,1/2.0,nx)
 
 domain = pyclaw.Domain(x)
 state = pyclaw.State(domain,1)
-q0 = np.load('q.npy')
 
 # Initial Data for 1D Riemann Problem
 u_ex = lambda T : cos(pi*(x.centers-T))**(10) * (1+sign(x.centers-T))/2
@@ -36,7 +34,6 @@ dx = state.grid.delta[0]
 dt = dx / 2
 T  = 1.0
 nt = int(T/dt)
-ion()
 figure()
 for i in xrange(nt):
 
@@ -61,4 +58,5 @@ plot(x.centers, q.T,'o')
 # plot(x.edges,q_pm[0,:,1],'ro')
 axis([-.5,.5,0,1])
 # plt.pause(.1)
+show()
 
