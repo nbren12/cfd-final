@@ -27,7 +27,7 @@ eta = 1             # Height Deviation
 c = np.sqrt(H*g)    # Speed of Gravity waves
 
 # Initialize Grid
-n = 700
+n = 500
 nx =n
 ny =n
 folder = "n%d_%s"%( nx,suffix )

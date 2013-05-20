@@ -18,9 +18,17 @@ from matplotlib import pyplot as plt
 
 
 
-g = 9.812
-H = 1
-nx = 200
+T  = 1.0
+g = 9.812           # Gravity
+H = 2               # Average Depth
+eta = 1             # Height Deviation
+c = np.sqrt(H*g)    # Speed of Gravity waves
+
+suffix = "o1"
+
+n = 11
+
+nx = 2**n
 ny = 2
 
 
@@ -34,14 +42,14 @@ state.problem_data ={  'g':g , 'efix':True,'hr':True,'bcs':2,'cfix':0}
 s_opts = {'f':0.1}
 
 dx,dy = state.grid.delta
-dt = dx / 10
+dt = min(dx,dy)/c/3.0
 T  = 1
 nt = int(T/dt)
 
 
 # Initial Data for 1d Dam Break
-h0 = np.ones((nx,ny)) #
-h0 = (2-np.sign(x.centers))[:,None]
+h0 = np.ones((nx,ny))*H#
+h0 -=np.sign(x.centers)[:,None]*eta
 u0 = np.zeros(domain.grid.num_cells)
 v0 = np.zeros(domain.grid.num_cells)
 
@@ -50,7 +58,7 @@ state.q[0,:,:] = h0
 state.q[1,:,:] = (u0*h0)
 state.q[2,:,:] = (v0*h0)
 
-cont = Controller(state,advance_sw)
+cont = Controller(state,advance_sw,dt=dt,prefix="dam_break1d_n%d_%s"%(nx,suffix))
 
 cont.run(T)
 
