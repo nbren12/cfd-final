@@ -208,7 +208,7 @@ implicit none
 real(8) theta,y
 intent(in) theta
 
-if ( theta .lt. 0 ) then
+if ( theta .gt. 0 ) then
     y  = min(1.0,theta)
 else 
     y  = max(-1.0,theta)
