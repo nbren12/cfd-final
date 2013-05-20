@@ -23,6 +23,7 @@ if (a(j,0) .ne. 0.0D0) then
     else
         theta(j) = a(j,1)/a(j,0)
     end if
+    !a_c(j) = theta(j)
     a_c(j)=PHI(theta(j)) 
     !a_c(j)=minmod(theta(j)) 
 else 
