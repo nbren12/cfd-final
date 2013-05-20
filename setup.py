@@ -12,6 +12,8 @@ def configuration(parent_package='',top_path=None):
                        quiet=True)
 
     config.add_subpackage('swe2d','src/swe2d')
+    config.add_subpackage('weno','src/weno')
+
 
     return config
 
