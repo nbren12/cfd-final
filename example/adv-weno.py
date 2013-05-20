@@ -9,11 +9,10 @@ hu^2 = q2^2/q1 + 1/2 g q2^2
 Here, I used periodic boundary conditions. Might want to generalize the code later.
 """
 import numpy as np
-from ipdb import set_trace as st
 from math import sqrt
 from clawpack import pyclaw
 from matplotlib import pyplot as plt
-from adv_weno import advance_1d
+from weno import advance_1d
 from pylab import *
 
 nx = 100
