@@ -11,7 +11,7 @@ datadirs = filter(
         lambda x : os.path.isdir(x),
         datadirs)
 
-frame= 10
+frame= 7
 hrcont = interp_maker(frame)
 hrdat.read_frame(frame)
 
@@ -35,15 +35,19 @@ def calc_error(cont):
 
     return sqrt(err2),r,q
 
-data = __import__(datadirs[5])
-data.cont.read_frame(frame)
-assert(isnan(data.cont.state.q).sum()==0)
+
+for dd in datadirs:
+    print dd
+    data = __import__(dd)
+    data.cont.read_frame(frame)
+    assert(isnan(data.cont.state.q).sum()==0)
 
 
 
-# err= calc_error(data.cont)
-cont = data.cont
-err2 , r,q = calc_error(cont)
+    # err= calc_error(data.cont)
+    cont = data.cont
+    err , r,q = calc_error(cont)
+    print err
 
 figure()
 plot(r.ravel(),q[0,:,:].ravel(),'o')
