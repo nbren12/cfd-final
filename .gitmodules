@@ -1,3 +1,0 @@
-[submodule "pyclaw"]
-	path = pyclaw
-	url = https://github.com/clawpack/pyclaw.git
