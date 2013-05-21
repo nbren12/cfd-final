@@ -1,0 +1,1831 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 11
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 1
+\use_mathdots 1
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1in
+\topmargin 1in
+\rightmargin 1in
+\bottommargin 1in
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+CFD Final Project
+\end_layout
+
+\begin_layout Author
+Noah D.
+ Brenowitz
+\end_layout
+
+\begin_layout Date
+May 20, 2013
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/rad-dam-break/evolution/t0.4_2dhr.png
+	width 100col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+thispagestyle{empty}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+setcounter{page}{0}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+newpage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For this project, we implemented a high resolution Finite Volume Method
+ (FVM) to solve the Shallow Water Equations (SWE) in both one and two dimensions
+:
+\begin_inset Formula 
+\[
+\begin{pmatrix}h\\
+hu\\
+hv
+\end{pmatrix}_{t}+\begin{pmatrix}hu\\
+\frac{1}{2}gh^{2}+hu^{2}\\
+huv
+\end{pmatrix}_{x}+\begin{pmatrix}hv\\
+huv\\
+\frac{1}{2}gh^{2}+hv^{2}
+\end{pmatrix}_{y}=0
+\]
+
+\end_inset
+
+These equations are a simplification for the full equations of motion under
+ the assumption of constant density and hydrostatic balance.
+ For convenience, we assume a flat-bottom scenario.
+ An example of a shallow water flow is a Tsunami, which has long horizontal
+ extent compared to the depth of the ocean.
+ We also consider the Rotating SWE on an 
+\begin_inset Formula $f$
+\end_inset
+
+-plane:
+\begin_inset Formula 
+\[
+\begin{pmatrix}h\\
+hu\\
+hv
+\end{pmatrix}_{t}+\begin{pmatrix}hu\\
+\frac{1}{2}gh^{2}+hu^{2}\\
+huv
+\end{pmatrix}_{x}+\begin{pmatrix}hv\\
+huv\\
+\frac{1}{2}gh^{2}+hv^{2}
+\end{pmatrix}_{y}=-f\begin{pmatrix}0\\
+-hv\\
+hu
+\end{pmatrix}
+\]
+
+\end_inset
+
+which are a simplication of the equations of motion in a rotating plane.
+ These equations are of great importance in Geophysical Fluid Dynamics (GFD),
+ and the source terms on the right our known as the 
+\emph on
+coriolis 
+\emph default
+terms.
+ In the nonconservation form, the balance 
+\begin_inset Formula $f\times u=-g\nabla h$
+\end_inset
+
+ is know as 
+\emph on
+geostrophic
+\emph default
+ balance.
+ For more information on these equation in the context of the atmosphere
+ and ocean see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "vallis_atmospheric_2006"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The SWE cast in the above form are an example of a hyperbolic conservation
+ law, so the methods implemented here are generally applicable.
+ Other examples of hyperbolic systems are the equations for gas dynamics
+ and Burger's equation.
+\end_layout
+
+\begin_layout Section
+Methods
+\end_layout
+
+\begin_layout Standard
+The numerical schemes in this report were devoped in the textbook by Randal
+ L.
+ Leveque
+\begin_inset CommandInset citation
+LatexCommand cite
+key "LeVeque2002"
+
+\end_inset
+
+.
+ For the sake of brevity, I brush over details that are well explained in
+ the text.
+ The code is available on GitHub at 
+\begin_inset Flex URL
+status collapsed
+
+\begin_layout Plain Layout
+
+https://github.com/nbren12/cfd-final
+\end_layout
+
+\end_inset
+
+.
+ I have also provided a tar file along with this report, but I recommend
+ GitHub, since you can look at my commits and browse the code easily.
+ In the root of the code there is a 
+\family typewriter
+README.md
+\family default
+.
+ Once again, this can be viewed easily at the link above.
+ 
+\end_layout
+
+\begin_layout Paragraph
+1D Solver
+\end_layout
+
+\begin_layout Standard
+For the 1D solver, we implemented a Roe Averaging approximate Riemann solver.
+ The precise form of the Roe Averaging fluxes is given in the Appendix of
+ this report.
+ To ensure this approximate solver produced entropy-condition satisfying
+ solutions, we employed the 
+\emph on
+Harten-Hyman 
+\emph default
+entropy fix.
+ To achieve high resolution, we used a fully discrete framework and modified
+ the flux to achieve second order accuracy.
+ This flux was then limited using a 
+\begin_inset Quotes eld
+\end_inset
+
+Superbee
+\begin_inset Quotes erd
+\end_inset
+
+ or a 
+\begin_inset Quotes eld
+\end_inset
+
+minmod
+\begin_inset Quotes erd
+\end_inset
+
+ (e.g.
+ minimum modulus) limiter.
+ 
+\end_layout
+
+\begin_layout Paragraph
+2D Solver
+\end_layout
+
+\begin_layout Standard
+The 2D solver with high resolution was implemented similarly to the 1D case.
+ Roe averaging was used to solve the approximate riemann problem on each
+ interface, and superbee-limited second order correction fluxes were applied.
+ The main difference here, was that a roe solver in the y-direction was
+ different, yet quite similar to the roe solver for the x-direction.
+\end_layout
+
+\begin_layout Standard
+The real difference between the 1D and 2D cases arises in the application
+ of corner-corrective fluxes at each interface to allow for proper upwinding
+ and stability.
+ At vertical interfaces (e.g.
+ the left and right) the y-direction riemann solver is applied first-order
+ x-direction fluctuations.
+ The end result is a division of the right/left going fluctuations into
+ right-then-up, right-then-down, left-then-up, and left-then-down fluctations.
+ The right-then-up fluctuations are then used to modify the fluxes in the
+ horizontal interface to upper-right of the current interface, and analogously
+ for the other corrections.
+\end_layout
+
+\begin_layout Standard
+The same procedure is applied to the horizontal interfaces (e.g.
+ up and down) to obtain modifying fluxes that go down-then-left, down-then
+ right, etc.
+ For more details, see Chapter 21 in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "LeVeque2002"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Paragraph
+Initial Conditions
+\end_layout
+
+\begin_layout Standard
+When considering a nonsmooth initial condition in 2D, it can important to
+ implement the initial condition as an 
+\emph on
+average 
+\emph default
+over cells.
+ This has the effect of smoothing the initial condition on coarse grids.
+ To implement this, we first calculate the initial condition over an extremely
+ fine grid (at least 7 times the resultion in each direction).
+ Then, we interpolate this grid using 
+\begin_inset Quotes eld
+\end_inset
+
+scipy.interpolate.RectBivariateSpline
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This interpolant was then integrated over each coarse grid cell to obtain
+ the averaged initial condition.
+\end_layout
+
+\begin_layout Paragraph
+Boundary Conditions
+\end_layout
+
+\begin_layout Standard
+In this project we impemented three different types of boundary conditions
+ in various combinations: periodic, outflow, and Neumann conditions.
+ All the boundary conditions were implemented using ghost cells.
+ For the high resolution method, two ghost cells in each direction were
+ required.
+ Periodic conditions were the simplest to implement 
+\begin_inset Formula $q_{j}=q_{j\%n}$
+\end_inset
+
+ where 
+\begin_inset Formula $j\%n$
+\end_inset
+
+ means 
+\begin_inset Formula $j$
+\end_inset
+
+ modulo 
+\begin_inset Formula $n$
+\end_inset
+
+.
+ Outflow conditions, which are the simplest of the 
+\begin_inset Quotes eld
+\end_inset
+
+nonreflecting
+\begin_inset Quotes erd
+\end_inset
+
+ boundary conditions, are achieved by zeroth order extrapolation: 
+\begin_inset Formula $q_{j\in ghost}=q_{n}\mbox{ or }q_{1}$
+\end_inset
+
+ depending on whether the 
+\begin_inset Formula $j>n$
+\end_inset
+
+ or 
+\begin_inset Formula $j<1$
+\end_inset
+
+.
+ Neumann conditions were similarly implemented by an even extension across
+ the interface: 
+\begin_inset Formula $q_{n+j}=q_{n-j}$
+\end_inset
+
+ or 
+\begin_inset Formula $q_{1-j}=q_{1+j}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Paragraph
+Source Terms
+\end_layout
+
+\begin_layout Standard
+Source term 
+\begin_inset Formula $q_{t}+\nabla\cdot f(q)=\psi(q)$
+\end_inset
+
+ were handled using 
+\emph on
+Godunov 
+\emph default
+splitting, which is a fractional step method.
+ First, the conservation law 
+\begin_inset Formula $q_{t}+\nabla\cdot f(q)=0$
+\end_inset
+
+ is advanced 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+ using the schemes discussed above.
+ Then, using this intermediate value as an initial condition, the ordinary
+ differential equation 
+\begin_inset Formula $q_{t}=\psi(q)$
+\end_inset
+
+ is advanced 
+\begin_inset Formula $\Delta t$
+\end_inset
+
+.
+ To solve integrate the ODE, I chose to use the simplest second-order Runge-Kutt
+a method: the explicit midpoint rule:
+\begin_inset Formula 
+\begin{eqnarray*}
+q^{*} & = & q^{n}+\frac{\Delta t}{2}\psi(q^{n})\\
+q^{n+1} & = & q^{n}+\frac{\Delta t}{2}\psi(q^{*})
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This approach was used for both the coriolis terms in the rotating shallow
+ water equations, as well as the metric (e.g.
+ 
+\begin_inset Formula $r^{-1}$
+\end_inset
+
+) terms in the radial dam break problem.
+\end_layout
+
+\begin_layout Paragraph
+Time Step
+\end_layout
+
+\begin_layout Standard
+For the following examples, we choose the time step to satisfy a CFL condition.
+ For the shallow water system, the fastest riemann invariant travels at
+ 
+\begin_inset Formula $\lambda=u+c\mbox{ or }u-c$
+\end_inset
+
+.
+ 
+\begin_inset Formula $c=\sqrt{gH}$
+\end_inset
+
+.
+ Assuming the velocity is less than the speed of gravity waves 
+\begin_inset Formula $c$
+\end_inset
+
+, we can assume that 
+\begin_inset Formula $\lambda_{max}\approx c$
+\end_inset
+
+.
+ Therefore the CFL condition requires that
+\begin_inset Formula 
+\[
+\lambda_{max}\frac{\Delta t}{\Delta x}\leq C.
+\]
+
+\end_inset
+
+In practice, we choose 
+\begin_inset Formula $\Delta t=\frac{\Delta x}{3c}$
+\end_inset
+
+ to ensure stability.
+\end_layout
+
+\begin_layout Section
+Results
+\end_layout
+
+\begin_layout Subsection
+Dam Break
+\end_layout
+
+\begin_layout Standard
+In this section, we aim to solve the dam break problem.
+ This is simply the inital value problem
+\begin_inset Formula 
+\[
+h(x,0)=\begin{cases}
+H+\eta & x<0\\
+H-\eta & x>0
+\end{cases}
+\]
+
+\end_inset
+
+with the velocity at rest initially.
+ For our purposes, we considered the situation 
+\begin_inset Formula $H=2$
+\end_inset
+
+ and 
+\begin_inset Formula $\eta=1$
+\end_inset
+
+, this is a large deviation compared to the overall depth, so one would
+ expect high velocities.
+ Gravity is taken to be 
+\begin_inset Formula $9.812$
+\end_inset
+
+.
+ In particular, the Froude number for this system will be large.
+ Numerically, we must solve on a finite grid, so we employed 
+\begin_inset Quotes eld
+\end_inset
+
+outflow
+\begin_inset Quotes erd
+\end_inset
+
+ extrapolation conditions described above.
+ However, since the problem is hyperbolic, boundary condition information
+ propogates at finite speed, and has no affect on some interior region of
+ the solution.
+ In particular, we solve this on the domain (-10,10).
+ For simplicity of programming, we used the 2D solving code with an Nx2
+ grid, turned off the corner-correction fluxes, and used periodic boundary
+ conditions on the vertical boundaries to ensure the solution matched the
+ 1D solution.
+\end_layout
+
+\begin_layout Standard
+The SWE with these intial conditions were solved using the methods outlined
+ above, and Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:dam"
+
+\end_inset
+
+ contains a plot of the evolution of this solution.
+ The solution at all times consists only of rarefaction waves and shocks.
+ Therefore, the solution is piecewise linear with discontinouities.
+ The to this particular Riemann problem is analytically known, but requires
+ a nonlinear root solve, and it is easier to just use a very high resolution
+ to obtain the 
+\begin_inset Quotes eld
+\end_inset
+
+exact
+\begin_inset Quotes erd
+\end_inset
+
+ evolution.
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Time Evolution 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:evol"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Dam Break
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:dam"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename figures/evol_1d.eps
+	height 15cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Radial Dam Break
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:rad-dam"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename figures/rad-plot-evol.eps
+	height 15cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To analyze the performance of the various schemes and flux-limiters, we
+ plot the numerical solutions at 
+\begin_inset Formula $t=.7$
+\end_inset
+
+ in 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rad-dam"
+
+\end_inset
+
+.
+ As expected, the HR schemes more accurately capture the sharp cornes of
+ the rarefaction waves and shocks than the first-order Godunov scheme.
+ Also, the 
+\begin_inset Quotes eld
+\end_inset
+
+SuperBee
+\begin_inset Quotes erd
+\end_inset
+
+ limiter appears to perform better than the 
+\begin_inset Quotes eld
+\end_inset
+
+MinMod
+\begin_inset Quotes erd
+\end_inset
+
+ limiter.
+ 
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Dam Break Scheme Comparison at 
+\begin_inset Formula $t=.7$
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:dam-comp"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/dam-break/t0.7_compare.eps
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Radial Dam Break
+\end_layout
+
+\begin_layout Standard
+To test the performance of the 2D HR solver, we use a radial dam break initial
+ value problem:
+\begin_inset Formula 
+\[
+h(x,0)=\begin{cases}
+H+\eta & |x|<R\\
+H-\eta & |x|>R
+\end{cases}
+\]
+
+\end_inset
+
+We solved this problem using the 2D solver on a square grid at various resolutio
+ns (on the domain 
+\begin_inset Formula $(-10,10)^{2}$
+\end_inset
+
+), the surface plot on the cover of this report is the height field at 
+\begin_inset Formula $t=.4$
+\end_inset
+
+.
+ As before, gravity is taken to be 
+\begin_inset Formula $9.812$
+\end_inset
+
+.
+ The advantage of using this radially symmetric problem, was that we can
+ also solving using the 1D solver! By casting the SWE in polar coordinates
+ and assuming radial symmetry we obtain the following problem:
+\begin_inset Formula 
+\[
+\left(\begin{array}{c}
+h\\
+hu
+\end{array}\right)_{t}+\left(\begin{array}{c}
+hu\\
+hu^{2}+\frac{1}{2}gh^{2}
+\end{array}\right)_{x}=-\frac{1}{r}\left(\begin{array}{c}
+hu\\
+hu^{2}
+\end{array}\right)
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $u$
+\end_inset
+
+ is now the radial component of the velocity.
+ The source term on the right is treated using the fractional step approach
+ above.
+ We can solve this 1D problem at extremely high resolution, so we in practice
+ treat it as the exact solution.
+ The evolution of the height field solved with 
+\begin_inset Formula $n=4000$
+\end_inset
+
+ is shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rad-dam"
+
+\end_inset
+
+.
+ As before, the solution consists of shocks and rarefactions, but the source
+ term, which dampens small 
+\begin_inset Formula $r$
+\end_inset
+
+ heavily, has added some smooth structure to the solution.
+\end_layout
+
+\begin_layout Standard
+We first compare the 2D HR with superbee limiter and 2D Godunov methods,
+ by making scatter plots between radius and height.
+ These can be seen in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rad-dam-comp"
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Radial Dam Break Scheme Comparison at 
+\begin_inset Formula $t=.3$
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:rad-dam-comp"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+100x100 High Resolution 2D vs 1D
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename figures/rad-dam-break/hr vs 1d/n100_2dhr_v_1d.eps
+	width 45col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+100x100 Godunov w/ Corner Fix 2D vs 1D
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename figures/rad-dam-break/hr vs 1d/n100_2order1cfix_v_1d.eps
+	width 45col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+.
+ It is easy to see that that HR scheme does a much better job of approximating
+ the 
+\begin_inset Quotes eld
+\end_inset
+
+exact
+\begin_inset Quotes erd
+\end_inset
+
+ solution than does the first order scheme.
+ 
+\end_layout
+
+\begin_layout Standard
+A convergence analysis is shown Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rad-conv"
+
+\end_inset
+
+.
+ We compare the HR scheme with and without corner flux correction, and without
+ the entropy fix to the Godunov scheme with corner correction.
+ Amongst the HR scheme there is little difference, but the error is lowest
+ at most resolutions for the HR with corner correction and entropy fix.
+ Notably, the HR schemes are all much better than the first order scheme;
+ however, the 
+\emph on
+rate 
+\emph default
+of convergence is sublinear for all the schemes.
+ 
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Radial Dam Break Convergence at 
+\begin_inset Formula $t=.7$
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:rad-conv"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename figures/rad-dam-break/convergence_raddam_2d.eps
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+.
+ While it would be nice to see quadratic convergence for the HR schemes,
+ it should not be expected because the solution is obviously not smooth,
+ and we considered global error estimates.
+ Had we constrained this analysis to only smooth regions, the story could
+ well be different.
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:rad-conv"
+
+\end_inset
+
+ did not show that corner flux correction significantly improves the error
+ characterstics of the numerical solution.
+ This could have happened because numerical diffusion blurred the solutions
+ by 
+\begin_inset Formula $t=.7$
+\end_inset
+
+ thereby removing the distortions in the non corner corrected solution.
+ To explore this in further depth, we plot the two solutions with 
+\begin_inset Formula $n=100$
+\end_inset
+
+ at a shorter time (
+\begin_inset Formula $t=.2$
+\end_inset
+
+) in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:cfix-comp"
+
+\end_inset
+
+.
+ Qualititatively, the contours for the corner corrected solution is cleaner
+ and shows less distortion and 
+\begin_inset Quotes eld
+\end_inset
+
+boxiness
+\begin_inset Quotes erd
+\end_inset
+
+ than the uncorrected version.
+ 
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Corner fix performance at 
+\begin_inset Formula $t=.2$
+\end_inset
+
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:cfix-comp"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Corner Fix
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename figures/rad-dam-break/cfix v nocfix/n100_2dhr_t0.200000.eps
+	width 50col%
+	clip
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+No Corner Fix 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename figures/rad-dam-break/cfix v nocfix/n100_hr_nocfix_t0.200000.eps
+	width 50col%
+	clip
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection
+Geostrophic Adjustment
+\end_layout
+
+\begin_layout Standard
+Now, we consider the Rotating SWE, and the geostrophic adjustment problem.
+ This is an important problem in Geophysical Fluid Dynamics, because it
+ explains how the dominant balance in atmosphere and ocean arises.
+ The initial conditions are a dam break with mean height 
+\begin_inset Formula $H=10$
+\end_inset
+
+ and deviation 
+\begin_inset Formula $\eta=.1$
+\end_inset
+
+.
+ Gravity is taken to be 
+\begin_inset Formula $.1$
+\end_inset
+
+, so that the gravity wave speed 
+\begin_inset Formula $c=\sqrt{gH}=1$
+\end_inset
+
+.
+ We consider, a strongly rotating case with 
+\begin_inset Formula $f=5$
+\end_inset
+
+, and solve over the domain 
+\begin_inset Formula $(-1,1)$
+\end_inset
+
+.
+ The coriolis source terms are treated using the fractional step procedure
+ described above.
+ The evolution is shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:geo-evol"
+
+\end_inset
+
+ and a comparison between HR and first order is shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:geo-comp"
+
+\end_inset
+
+.
+ As before, the HR scheme captures the sharp features much better.
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Geostrophic Adjustment 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Time Evolution
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:geo-evol"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename figures/geo-adj/evol_n1024.png
+	height 7cm
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Scheme Comparison at 
+\begin_inset Formula $t=.6$
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:geo-comp"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename figures/geo-adj/t0.6_f5_H10_eta.1_g.1_compare.eps
+	height 7cm
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Finally, a succesive errors convergence analysis comparing the 1D HR scheme
+ is shown in Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:geo-conv"
+
+\end_inset
+
+.
+\begin_inset Float table
+wide false
+sideways false
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+Geostrophic Adjustment Convergence
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:geo-conv"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+subfloat[High Resolution]{
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tabular}{rrrr}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+multicolumn{1}{l}{$n$} & 
+\backslash
+multicolumn{1}{l}{$
+\backslash
+left
+\backslash
+Vert u_{n}-u_{n/2}
+\backslash
+right
+\backslash
+Vert _{2}$} & 
+\backslash
+multicolumn{1}{l}{Ratio} & $
+\backslash
+log_{2}
+\backslash
+ensuremath{(
+\backslash
+text{Ratio})}$ 
+\backslash
+
+\backslash
+ 
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+32 &  &  &  
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+64 & 0.025161873 &  &  
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+128 & 0.019001844 & 1.324180566 & 0.405099862 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+256 & 0.013886876 & 1.368331061 & 0.452417325 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+512 & 0.009941277 & 1.396890613 & 0.482219051 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+1024 & 0.006618258 & 1.50209863 & 0.586979545 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+2048 & 0.004422908 & 1.496358934 & 0.581456278 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+} 
+\backslash
+subfloat[First Order Godunov]{
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tabular}{rrrr}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+multicolumn{1}{l}{$n$} & 
+\backslash
+multicolumn{1}{l}{$
+\backslash
+left
+\backslash
+Vert u_{n}-u_{n/2}
+\backslash
+right
+\backslash
+Vert _{2}$} & 
+\backslash
+multicolumn{1}{l}{Ratio} & $
+\backslash
+log_{2}
+\backslash
+ensuremath{(
+\backslash
+text{Ratio})}$ 
+\backslash
+
+\backslash
+  
+\backslash
+hline
+\end_layout
+
+\begin_layout Plain Layout
+
+32 &  &  &  
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+64 & 0.018546753 &  &  
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+128 & 0.016457235 & 1.126966489 & 0.172444617 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+256 & 0.014558409 & 1.130428142 & 0.176869287 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+512 & 0.012359751 & 1.177888577 & 0.236203073 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+1024 & 0.010409579 & 1.18734397 & 0.24773794 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+2048 & 0.008807568 & 1.181890292 & 0.241096125 
+\backslash
+
+\backslash
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Because there is a very nonlinear smooth region in the solution, the HR
+ scheme is able to show faster 
+\emph on
+global
+\emph default
+ convergence than the first order scheme.
+ In fact, the convergence is nearly twice as large for the HR scheme.
+\end_layout
+
+\begin_layout Section
+Conclusion
+\end_layout
+
+\begin_layout Standard
+In this report, we implemented a 
+\begin_inset Quotes eld
+\end_inset
+
+High Resolution
+\begin_inset Quotes erd
+\end_inset
+
+ method for solving the Shallow Water Equations in both rotating and non-rotatin
+g settings.
+ The numerical schemes were given in the text by Leveque 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "LeVeque2002"
+
+\end_inset
+
+.
+ On the test problems considered, the HR scheme, which has analytical second
+ order accuracy, was not able to achieve quadratic error reduction.
+ This is expected given the non-smooth nature of the problems and the presence
+ of flux-limiters.
+ That said, the HR scheme uniformly outperformed the first order scheme
+ both qualitatively and quantitavely.
+ The same cannot be said for the 
+\begin_inset Quotes eld
+\end_inset
+
+corner-correction
+\begin_inset Quotes erd
+\end_inset
+
+, but that correction did yield qualitative improvements.
+\end_layout
+
+\begin_layout Standard
+For future work, the we could achieve higher former order of convergence
+ with Weighted Essentially Nonoscillatory (WENO) schemes.
+ In fact, we implemented a fifth order scheme for the uniform advection
+ scheme, but did not show the results here.
+ For a review of these schemes in both the Finite Volume as well as Finite
+ Difference framework see the review paper 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Shu2009"
+
+\end_inset
+
+.
+ The application of such schemes to the SWE is described in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Xing2005"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Finally, for a complete analysis of the nonlinear Geostrophic Adjustment
+ problem using these same schemes, please see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kuo1997"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section*
+Appendix
+\end_layout
+
+\begin_layout Subsection*
+Roe Averaging for Shallow Water Equations
+\end_layout
+
+\begin_layout Standard
+For 1D, the Roe averaging is given in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "vallis_atmospheric_2006,LeVeque2002"
+
+\end_inset
+
+.
+ For 2 dimensions, it is relatively easy to show that a similar roe averaging
+ operator works.
+ In particular, for 
+\begin_inset Formula $\hat{u}$
+\end_inset
+
+ and 
+\begin_inset Formula $\hat{v}$
+\end_inset
+
+, use the weighted averaging defined as follows: 
+\begin_inset Formula 
+\[
+\hat{u}=\frac{\sqrt{h_{l}}u_{l}+\sqrt{h_{r}}{u_{r}}}{\sqrt{h_{l}}+\sqrt{h_{r}}}.
+\]
+
+\end_inset
+
+While for 
+\begin_inset Formula $\bar{h}$
+\end_inset
+
+ use a simple arithmatic average.
+ 
+\end_layout
+
+\begin_layout Standard
+Then the flux matrices in the x and y directions are respectively
+\begin_inset Formula 
+\[
+\hat{A}=\left(\begin{array}{ccc}
+0 & 1 & 0\\
+-\hat{u}^{2}+g\bar{h} & 2\hat{u} & 0\\
+\hat{u}\hat{v} & \hat{v} & \hat{u}
+\end{array}\right)
+\]
+
+\end_inset
+
+and 
+\begin_inset Formula 
+\[
+\hat{B}=\left(\begin{array}{ccc}
+0 & 1 & 0\\
+-\hat{u}\hat{v} & \hat{v} & \hat{u}\\
+-\hat{v}^{2}+g\bar{h} & 0 & 2\hat{v}
+\end{array}\right).
+\]
+
+\end_inset
+
+These results are derived using by setting 
+\begin_inset Formula $z_{i}=q_{i}/\sqrt{h}$
+\end_inset
+
+ and proceding as in the book.
+\end_layout
+
+\begin_layout Standard
+These matrices are just the Jacobian matrices of the fluxes with the Roe-average
+d quantities inserted.
+ 
+\end_layout
+
+\begin_layout Author
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "biblio"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
