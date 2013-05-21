@@ -17,7 +17,7 @@ from swe2d import Controller, ControllerSW2D,advance_sw
 from matplotlib import pyplot as plt
 from scipy.interpolate import RectBivariateSpline
 
-suffix = "minmod"
+suffix = "hr"
 
 R = 3
 T  = 1.0
@@ -27,7 +27,7 @@ eta = 1             # Height Deviation
 c = np.sqrt(H*g)    # Speed of Gravity waves
 
 # Initialize Grid
-n = 500
+n = 100
 nx =n
 ny =n
 folder = "n%d_%s"%( nx,suffix )
@@ -85,21 +85,3 @@ print("Beginning Time Stepping")
 cont = ControllerSW2D(state,advance_sw,dt=dt,prefix=folder)
 cont.run(T)
 
-# from mpl_toolkits.mplot3d import Axes3D
-# h = cont.state.q[0,:,:]
-#
-# cont.read_frame(0)
-# fig = plt.figure(figsize=(12,4))
-# ax = fig.add_subplot(121,projection='3d')
-# cont.surf_plot(ax=ax)
-#
-# cont.read_frame(5)
-# ax = fig.add_subplot(122,projection='3d')
-# cont.surf_plot(ax)
-#
-#
-# fig1 = plt.figure()
-# ax = fig1.add_subplot(111)
-# cont.cont_plot(ax=ax)
-# plt.show()
-#
